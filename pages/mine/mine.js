@@ -89,6 +89,10 @@ Page({
       menu_key: key
     })
 
+    if (key === 'share') {
+      return
+    }
+
     if (key === 'about') {
       wx.navigateTo({
         url: '/pages/mine/about/about'

@@ -1,4 +1,4 @@
-<navigation-bar title="礼金记录本" back="{{false}}" color="#111111" background="transparent"></navigation-bar>
+<navigation-bar title="随礼日记" back="{{false}}" color="#111111" background="transparent"></navigation-bar>
 
 <view class="home-page">
   <scroll-view class="home-scroll" scroll-y type="list" enhanced show-scrollbar="{{false}}">

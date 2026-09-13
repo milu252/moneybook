@@ -41,7 +41,6 @@
             data-key="{{item.key}}"
             data-label="{{item.label}}"
             open-type="share"
-            bindtap="handleMenuTap"
           ></button>
         </view>
       </view>
