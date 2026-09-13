@@ -13,11 +13,14 @@ function isRemoteAvatar(avatar) {
   return !/^https?:\/\/tmp\//.test(value) && !/^https?:\/\/usr\//.test(value)
 }
 
+const initialProfile = getProfile()
+const defaultAvatar = '/assets/icons/default-avatar.svg'
+
 Page({
   data: {
-    avatar: '',
-    defaultAvatar: '/assets/icons/default-avatar.svg',
-    nickname: '微信用户',
+    avatar: initialProfile.avatar || defaultAvatar,
+    defaultAvatar,
+    nickname: initialProfile.nickname,
     saving: false
   },
 
@@ -42,8 +45,14 @@ Page({
     if (this.profileDirty) return
 
     this.setData({
-      avatar: profile.avatar === this.data.defaultAvatar ? '' : profile.avatar,
+      avatar: profile.avatar || this.data.defaultAvatar,
       nickname: profile.nickname
+    })
+  },
+
+  handleAvatarError() {
+    this.setData({
+      avatar: this.data.defaultAvatar
     })
   },
 

@@ -1,13 +1,17 @@
 const { fetchProfile, getProfile } = require('../../data/profile')
 const { track } = require('../../utils/analytics')
 
+const initialProfile = getProfile()
+
 Page({
   data: {
     user: {
-      name: '微信用户',
-      id: '1234567',
-      avatar: '/assets/icons/default-avatar.svg'
+      name: initialProfile.nickname,
+      id: initialProfile.id,
+      avatar: initialProfile.avatar
     },
+    pendingAvatar: '',
+    defaultAvatar: '/assets/icons/default-avatar.svg',
     menuItems: [
       { key: 'share', label: '分享给好友', icon: 'share', iconSrc: '/assets/icons/mine-share.svg' },
       { key: 'about', label: '关于我们', icon: 'about', iconSrc: '/assets/icons/mine-about.svg' },
@@ -33,12 +37,39 @@ Page({
 
   refreshProfile() {
     const profile = getProfile()
+    const nextAvatar = profile.avatar || this.data.defaultAvatar
+    const currentAvatar = this.data.user.avatar || this.data.defaultAvatar
+    const shouldPreloadAvatar = nextAvatar !== currentAvatar
+
     this.setData({
       user: {
         name: profile.nickname,
         id: profile.id,
-        avatar: profile.avatar
-      }
+        avatar: shouldPreloadAvatar ? currentAvatar : nextAvatar
+      },
+      pendingAvatar: shouldPreloadAvatar ? nextAvatar : ''
+    })
+  },
+
+  handleAvatarError() {
+    this.setData({
+      'user.avatar': this.data.defaultAvatar,
+      pendingAvatar: ''
+    })
+  },
+
+  handlePendingAvatarLoad() {
+    if (!this.data.pendingAvatar) return
+
+    this.setData({
+      'user.avatar': this.data.pendingAvatar,
+      pendingAvatar: ''
+    })
+  },
+
+  handlePendingAvatarError() {
+    this.setData({
+      pendingAvatar: ''
     })
   },
 

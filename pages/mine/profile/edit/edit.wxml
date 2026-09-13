@@ -4,7 +4,8 @@
   <button class="avatar-section" open-type="chooseAvatar" bindchooseavatar="chooseAvatar" hover-class="tap-active" hover-stay-time="80">
     <view class="avatar-wrap">
       <view class="avatar-circle">
-        <image class="avatar-image" src="{{avatar || defaultAvatar}}" mode="aspectFit"></image>
+        <image class="avatar-placeholder" src="{{defaultAvatar}}" mode="aspectFit"></image>
+        <image class="avatar-image" src="{{avatar || defaultAvatar}}" mode="aspectFit" binderror="handleAvatarError"></image>
       </view>
       <image class="avatar-camera" src="/assets/icons/avatar-camera.svg" mode="aspectFit"></image>
     </view>

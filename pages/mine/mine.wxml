@@ -4,7 +4,11 @@
   <scroll-view class="mine-scroll" scroll-y enhanced show-scrollbar="{{false}}">
     <view class="mine-content">
       <view class="profile-card" bindtap="editProfile" hover-class="tap-active" hover-stay-time="80">
-        <image class="avatar" src="{{user.avatar}}" mode="aspectFit"></image>
+        <view class="profile-avatar-wrap">
+          <image class="avatar-placeholder" src="{{defaultAvatar}}" mode="aspectFit"></image>
+          <image class="avatar" src="{{user.avatar || defaultAvatar}}" mode="aspectFit" binderror="handleAvatarError"></image>
+          <image wx:if="{{pendingAvatar}}" class="avatar-preload" src="{{pendingAvatar}}" mode="aspectFit" bindload="handlePendingAvatarLoad" binderror="handlePendingAvatarError"></image>
+        </view>
         <view class="profile-info">
           <view class="user-name">{{user.name}}</view>
           <view class="user-id">ID：{{user.id}}</view>
