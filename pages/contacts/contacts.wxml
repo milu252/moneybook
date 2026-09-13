@@ -26,6 +26,9 @@
             </view>
           </view>
         </view>
+        <view class="suggestion-panel suggestion-empty-panel" wx:elif="{{keyword}}">
+          <view class="suggestion-empty-text">无搜索结果</view>
+        </view>
       </view>
 
       <view class="total-text empty-total" wx:if="{{!total && !keyword}}">共{{total}}位联系人</view>

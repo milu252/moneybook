@@ -112,6 +112,18 @@ page {
   border-bottom: 0;
 }
 
+.suggestion-empty-panel {
+  min-height: 76rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.suggestion-empty-text {
+  color: #9b9b9b;
+  font-size: 26rpx;
+}
+
 .suggestion-name {
   flex: 1;
   min-width: 0;
