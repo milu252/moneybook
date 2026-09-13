@@ -19,9 +19,13 @@ Component({
   methods: {
     switchTab(event) {
       const { key, page } = event.currentTarget.dataset
-      if (!page || key === this.data.active) return
+      if (!page || key === this.data.active || this.switching) return
+      this.switching = true
       wx.redirectTo({
-        url: `/pages/${page}/${page}`
+        url: `/pages/${page}/${page}`,
+        complete: () => {
+          this.switching = false
+        }
       })
     }
   }

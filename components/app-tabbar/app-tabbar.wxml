@@ -6,8 +6,6 @@
     data-key="{{item.key}}"
     data-page="{{item.page}}"
     bindtap="switchTab"
-    hover-class="tap-active"
-    hover-stay-time="80"
   >
     <view wx:if="{{item.icon == 'home'}}" class="tab-icon home-icon">
       <view class="home-door-fill"></view>
