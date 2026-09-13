@@ -256,6 +256,8 @@ function _normalizeRecord(r) {
     dateLabel: formatMonthDay(month, day),
     fullDateText: formatFullDate(r.full_date),
     year,
+    createdAt: r.created_at || r.createdAt || r.create_time || r.createTime || '',
+    updatedAt: r.updated_at || r.updatedAt || r.update_time || r.updateTime || '',
     scene: r.scene,
     value: r.value,
     valueClass: r.value_class,

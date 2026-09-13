@@ -20,10 +20,33 @@ function sortByDate(sourceRecords, direction) {
       const dateCompare = direction === 'asc'
         ? left.record.fullDate.localeCompare(right.record.fullDate)
         : right.record.fullDate.localeCompare(left.record.fullDate)
+      if (dateCompare !== 0) return dateCompare
 
-      return dateCompare || left.index - right.index
+      const timeCompare = compareRecordCreateTime(left.record, right.record, direction)
+      return timeCompare || left.index - right.index
     })
     .map((item) => item.record)
+}
+
+function getRecordCreateTime(record) {
+  const timeValue = record.createdAt || record.created_at || record.createTime || record.create_time || ''
+  const timestamp = Date.parse(timeValue)
+  if (!Number.isNaN(timestamp)) return timestamp
+
+  const numericId = Number(record.id)
+  if (!Number.isNaN(numericId)) return numericId
+
+  return `${record.id || ''}`
+}
+
+function compareRecordCreateTime(leftRecord, rightRecord, direction) {
+  const leftTime = getRecordCreateTime(leftRecord)
+  const rightTime = getRecordCreateTime(rightRecord)
+  const compare = typeof leftTime === 'number' && typeof rightTime === 'number'
+    ? leftTime - rightTime
+    : `${leftTime}`.localeCompare(`${rightTime}`)
+
+  return direction === 'asc' ? compare : -compare
 }
 
 Page({
