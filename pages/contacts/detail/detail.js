@@ -17,6 +17,7 @@ function formatContactDetail(contact) {
     records: (contact.records || []).map((record) => ({
       ...record,
       displayScene: truncateText(record.scene, 7),
+      // 联系人主页右侧的礼物/请客内容保留 8 个字，第 9 个字开始省略。
       displayValue: truncateText(record.value, 8)
     }))
   }

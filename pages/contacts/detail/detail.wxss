@@ -189,7 +189,7 @@ page {
 }
 
 .record-value {
-  max-width: 210rpx;
+  max-width: 260rpx;
   padding-left: 14rpx;
   font-size: 27rpx;
   font-weight: 600;
