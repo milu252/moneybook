@@ -159,9 +159,7 @@
           <text class="table-col-receive green">{{item.receiveText}}</text>
           <text class="table-col-send red">{{item.sendText}}</text>
           <view class="table-col-balance table-balance black">
-            <text class="balance-sign">{{item.balanceNegative ? '-' : ''}}</text>
-            <text class="balance-currency">{{item.balanceCurrency}}</text>
-            <text class="balance-amount">{{item.balanceAmount}}</text>
+            <text class="balance-amount">{{item.balanceText}}</text>
           </view>
           <view class="table-col-arrow table-arrow"></view>
         </view>

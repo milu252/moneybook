@@ -51,7 +51,7 @@
         </view>
       </view>
 
-      <view class="total-text" wx:if="{{total || keyword}}">共{{total}}位联系人</view>
+      <view class="total-text list-total-text" wx:if="{{total || keyword}}">共{{total}}位联系人</view>
     </view>
   </scroll-view>
 

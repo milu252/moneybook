@@ -18,23 +18,8 @@ function formatValue(value, unit, withSign = false) {
     const prefix = withSign && value < 0 ? '-¥' : '¥'
     return `${prefix}${absValue}`
   }
-  return `${Math.abs(value)}`
-}
-
-function formatBalanceParts(value, unit) {
-  if (unit === 'money') {
-    return {
-      balanceNegative: value < 0,
-      balanceCurrency: '¥',
-      balanceAmount: `${Math.abs(Math.round(value))}`
-    }
-  }
-
-  return {
-    balanceNegative: value < 0,
-    balanceCurrency: '',
-    balanceAmount: `${Math.abs(value)}`
-  }
+  const prefix = withSign && value < 0 ? '-' : ''
+  return `${prefix}${Math.abs(value)}`
 }
 
 function createEmptyPeriod(label) {
@@ -73,8 +58,7 @@ function formatPeriodStats(periods, category) {
       receiveText: formatValue(item.receive, category.unit),
       sendText: formatValue(item.send, category.unit),
       balanceText: formatValue(balance, category.unit, true),
-      balanceClass: balance < 0 ? 'expense' : 'orange',
-      ...formatBalanceParts(balance, category.unit)
+      balanceClass: balance < 0 ? 'expense' : 'orange'
     }
   })
 }
