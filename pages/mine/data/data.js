@@ -46,9 +46,11 @@ Page({
     }
   },
 
-  openExportDialog() {
+  async openExportDialog() {
     clearTimeout(this.exportToastTimer)
     clearTimeout(this.exportDialogTimer)
+    const requestId = Date.now()
+    this.exportRequestId = requestId
     this.exportFile = null
     this.setData({
       exportPreparing: true,
@@ -56,20 +58,43 @@ Page({
       showExportDialog: false
     })
 
-    this.exportToastTimer = setTimeout(() => {
+    try {
+      const [file] = await Promise.all([
+        createRecordsWorkbookFile(),
+        new Promise((resolve) => {
+          this.exportToastTimer = setTimeout(resolve, 1500)
+        })
+      ])
+      if (this.exportRequestId !== requestId) return
+
+      this.exportFile = file
       this.setData({ showExportToast: false })
       this.exportDialogTimer = setTimeout(() => {
+        if (this.exportRequestId !== requestId) return
         this.setData({
           showExportDialog: true,
           exportPreparing: false
         })
       }, 120)
-    }, 1500)
+    } catch (error) {
+      if (this.exportRequestId !== requestId) return
+
+      console.error('export records failed', error)
+      this.setData({
+        showExportToast: false,
+        exportPreparing: false
+      })
+      wx.showToast({
+        title: error && error.message ? error.message : '导出失败，请重试',
+        icon: 'none'
+      })
+    }
   },
 
   closeExportDialog() {
     clearTimeout(this.exportToastTimer)
     clearTimeout(this.exportDialogTimer)
+    this.exportRequestId = 0
     this.setData({
       showExportDialog: false,
       showExportToast: false,

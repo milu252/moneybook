@@ -41,7 +41,7 @@
     </view>
   </view>
 
-  <view class="export-toast" wx:if="{{showExportToast || exporting}}">
+  <view class="export-toast" wx:if="{{showExportToast}}">
     <image class="loading-gift-icon" src="/assets/icons/loading-gift.svg" mode="aspectFit"></image>
     <view>表格生成中...</view>
   </view>
