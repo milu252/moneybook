@@ -45,7 +45,7 @@ Page({
       user: {
         name: profile.nickname,
         id: profile.id,
-        avatar: shouldPreloadAvatar ? currentAvatar : nextAvatar
+        avatar: shouldPreloadAvatar ? this.data.defaultAvatar : nextAvatar
       },
       pendingAvatar: shouldPreloadAvatar ? nextAvatar : ''
     })
