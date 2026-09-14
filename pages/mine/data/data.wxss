@@ -1,5 +1,6 @@
 page {
-  min-height: 100vh;
+  height: 100vh;
+  overflow: hidden;
   color: #111111;
   background:
     radial-gradient(circle at 14% 0%, rgba(221, 198, 161, 0.18), transparent 34%),
@@ -8,7 +9,8 @@ page {
 }
 
 .data-page {
-  min-height: 100vh;
+  height: calc(100vh - 88px);
+  overflow: hidden;
   padding: 70rpx 30rpx 80rpx;
   box-sizing: border-box;
 }
