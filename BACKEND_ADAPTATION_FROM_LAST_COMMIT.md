@@ -1,12 +1,12 @@
 # 后端适配说明：最近一次前端提交
 
-本文档根据前端最近一次提交 `c82ea89 feat: add analytics and account flows` 整理，用于交接后端开发。前端项目基础请求地址当前为：
+本文档根据前端最近一次提交 `0a24f8d 头像加载问题修复` 整理，用于交接后端开发。前端项目基础请求地址当前为：
 
 ```text
 https://api.shyren.xyz/moneybook/api/v1
 ```
 
-本次提交主要新增了全局埋点、账号注销流程、记录创建/编辑埋点、联系人联想所依赖的数据刷新，以及若干已有接口的更明确使用方式。后端需要重点确认并适配以下接口。
+当前前端已经接入登录鉴权、记录 CRUD、反馈、账号资料、头像上传、全局埋点和账号注销流程。最近一次提交修复了“我的”页面头像切换加载问题：当前端从 `GET /account/profile` 获取到新的 `avatar_url` 后，会先用默认头像占位，再预加载远程头像，加载成功后替换显示。因此后端需要保证头像 URL 可稳定访问，并返回前端可通过 `buildUrl()` 解析的路径。后端需要重点确认并适配以下接口。
 
 ## 1. 通用约定
 
@@ -247,7 +247,122 @@ Content-Type: application/json
 - 物理删除当前用户的指定记录，或做不可恢复删除。
 - 幂等更好：记录已不存在时可以返回 `200`，避免注销账号批量删除被单条缺失卡住。
 
-## 4. 反馈接口
+## 4. 账号资料与头像接口
+
+当前前端已经接入个人资料远程读取、更新和头像上传，相关逻辑在 `data/profile.js`、`pages/mine/mine.js` 和 `pages/mine/profile/edit/edit.js`。
+
+### 资料对象字段
+
+后端返回个人资料时，建议至少包含：
+
+```json
+{
+  "id": "1234567",
+  "nickname": "微信用户",
+  "avatar_url": "/uploads/avatars/user-123.jpg"
+}
+```
+
+字段说明：
+
+- `id`：用户 ID。前端会转成字符串展示。
+- `nickname`：用户昵称。为空时前端会回退为 `微信用户`。
+- `avatar_url`：头像地址。可以是完整 `http/https` URL，也可以是相对接口基础地址的路径。
+
+头像 URL 解析规则：
+
+- 如果是完整 `http/https` URL，前端直接使用。
+- 如果以 `/moneybook/api/v1` 开头，前端会替换为当前接口域名根路径。
+- 如果是其他 `/` 开头路径，前端会拼到 `https://api.shyren.xyz/moneybook/api/v1` 后面。
+- 如果不是 `/` 开头，前端会拼到 `https://api.shyren.xyz/moneybook/api/v1/` 后面。
+
+最近一次提交的头像加载修复依赖远程头像地址可被小程序 `<image>` 正常加载。建议后端返回长期有效、公开可读或在小程序环境中可访问的图片 URL，不要返回需要额外自定义请求头才能访问的地址。
+
+### `GET /account/profile`
+
+用途：进入“我的”页面和个人资料编辑页时获取当前用户资料。
+
+响应体：
+
+```json
+{
+  "id": "1234567",
+  "nickname": "微信用户",
+  "avatar_url": "/uploads/avatars/user-123.jpg"
+}
+```
+
+后端要求：
+
+- 需要鉴权，返回当前 token 对应用户。
+- 如果用户尚未设置昵称或头像，返回空值也可以，前端会使用默认值。
+- `avatar_url` 为空时前端显示默认头像。
+
+### `PATCH /account/profile`
+
+用途：保存个人资料编辑页的昵称和头像地址。
+
+请求体：
+
+```json
+{
+  "nickname": "新的昵称",
+  "avatar_url": "/uploads/avatars/user-123.jpg"
+}
+```
+
+响应体建议返回更新后的完整资料对象：
+
+```json
+{
+  "id": "1234567",
+  "nickname": "新的昵称",
+  "avatar_url": "/uploads/avatars/user-123.jpg"
+}
+```
+
+后端要求：
+
+- 需要鉴权，只能更新当前用户。
+- `nickname` 建议限制长度并去除首尾空白。
+- `avatar_url` 可以为空字符串，表示使用默认头像。
+
+### `POST /account/avatar`
+
+用途：上传微信 `chooseAvatar` 返回的本地头像文件。
+
+请求体：
+
+```json
+{
+  "filename": "avatar.jpg",
+  "content_type": "image/jpeg",
+  "data": "base64 编码后的图片内容"
+}
+```
+
+字段说明：
+
+- `filename`：前端从本地文件路径末尾截取，取不到时使用 `avatar.jpg`。
+- `content_type`：前端根据扩展名识别为 `image/png`、`image/webp` 或 `image/jpeg`。
+- `data`：图片文件的 base64 字符串，不带 data URL 前缀。
+
+响应体：
+
+```json
+{
+  "avatar_url": "/uploads/avatars/user-123.jpg"
+}
+```
+
+后端要求：
+
+- 需要鉴权。
+- 校验图片大小、类型和 base64 合法性。
+- 保存图片后返回可被小程序直接加载的 `avatar_url`。
+- 建议服务端统一转码、压缩和限制尺寸，避免过大头像影响“我的”页面加载。
+
+## 5. 反馈接口
 
 ### `POST /feedback`
 
@@ -280,7 +395,7 @@ Content-Type: application/json
 - 需要鉴权，关联当前用户。
 - 保存用户 ID、反馈类型、反馈内容、提交时间。
 
-## 5. 埋点接口
+## 6. 埋点接口
 
 本次提交新增了 `utils/analytics.js`，但前端目前还没有启用真实上报：
 
@@ -387,7 +502,7 @@ account_delete_second_confirm_click
 account_delete_success
 ```
 
-## 6. 注销账号流程需要后端配合
+## 7. 注销账号流程需要后端配合
 
 前端当前注销账号流程在 `pages/mine/settings/settings.js` 中：
 
@@ -415,21 +530,23 @@ DELETE /account
 
 如果后端实现了 `DELETE /account`，前端后续可以简化注销流程，避免逐条删除记录。
 
-## 7. 后端优先级建议
+## 8. 后端优先级建议
 
 优先做：
 
 1. 确认并稳定 `POST /auth/wx-login`。
 2. 完整支持记录接口：列表、新建、编辑、软删除、恢复、永久删除。
 3. 确保 `GET /records?include_deleted=true` 返回字段包含 `is_deleted` 和 `deleted_at`。
-4. 支持 `POST /feedback`。
-5. 新增 `POST /analytics/events`，再让前端打开 `ANALYTICS_ENDPOINT`。
-6. 设计并实现正式 `DELETE /account`，再让前端替换当前逐条永久删除逻辑。
+4. 支持账号资料接口：`GET /account/profile`、`PATCH /account/profile`、`POST /account/avatar`。
+5. 支持 `POST /feedback`。
+6. 新增 `POST /analytics/events`，再让前端打开 `ANALYTICS_ENDPOINT`。
+7. 设计并实现正式 `DELETE /account`，再让前端替换当前逐条永久删除逻辑。
 
-## 8. 前端侧注意事项
+## 9. 前端侧注意事项
 
 - 前端当前请求超时时间为 15 秒。
 - 前端会对记录接口失败做 toast 提示，但 `fetchRecords()` 失败只会打印日志并保留本地缓存。
-- 图片上传接口尚未接入；当前只有已经是 URL 的图片会提交到后端。
+- 记录图片上传接口尚未接入；当前记录表单只有已经是 URL 的图片会提交到后端。
 - 联系人没有独立后端表，联系人列表由记录中的 `name` 动态派生。
-- 个人资料目前只保存在本地缓存，后端暂时没有 profile 接口。
+- 个人资料会保存在本地缓存，同时会通过 `GET /account/profile` 和 `PATCH /account/profile` 与后端同步。
+- 头像上传已经接入 `POST /account/avatar`，请求体使用 JSON + base64，不是 multipart/form-data。
