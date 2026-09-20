@@ -24,6 +24,7 @@
     "pages/mine/settings/privacy/privacy"
   ],
   "window": {
+    "navigationBarTitleText": "随礼日记-记录人情往来",
     "navigationBarTextStyle": "black",
     "navigationStyle": "custom"
   },

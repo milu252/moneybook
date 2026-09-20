@@ -1,8 +1,56 @@
 const { fetchProfile, getProfile } = require('../../data/profile')
+const { get, buildUrl } = require('../../utils/request')
 const { track } = require('../../utils/analytics')
 const logger = require('../../utils/logger')
 
 const initialProfile = getProfile()
+const SHARE_STORAGE_KEY = 'moneybook_share_config'
+const DEFAULT_SHARE_TITLE = '随礼日记-记录人情往来'
+const DEFAULT_SHARE_PATH = '/pages/index/index'
+
+function normalizeShareConfig(config) {
+  const imageUrl = config && (config.image_url || config.imageUrl)
+
+  return {
+    title: config && config.title ? config.title : DEFAULT_SHARE_TITLE,
+    path: config && config.path ? config.path : DEFAULT_SHARE_PATH,
+    imageUrl: imageUrl ? buildUrl(imageUrl) : ''
+  }
+}
+
+function getStoredShareConfig() {
+  try {
+    const config = wx.getStorageSync(SHARE_STORAGE_KEY)
+    return config && typeof config === 'object' ? config : {}
+  } catch (error) {
+    return {}
+  }
+}
+
+function saveShareConfig(config) {
+  const nextConfig = normalizeShareConfig(config)
+  wx.setStorageSync(SHARE_STORAGE_KEY, nextConfig)
+  return nextConfig
+}
+
+function buildShareMessage() {
+  const config = {
+    title: DEFAULT_SHARE_TITLE,
+    path: DEFAULT_SHARE_PATH,
+    imageUrl: '',
+    ...getStoredShareConfig()
+  }
+  const message = {
+    title: config.title || DEFAULT_SHARE_TITLE,
+    path: config.path || DEFAULT_SHARE_PATH
+  }
+
+  if (config.imageUrl) {
+    message.imageUrl = config.imageUrl
+  }
+
+  return message
+}
 
 Page({
   data: {
@@ -24,6 +72,7 @@ Page({
 
   onLoad() {
     this.refreshProfile()
+    this.refreshShareConfig()
   },
 
   onShow() {
@@ -41,6 +90,24 @@ Page({
       .catch((error) => {
         logger.error('mine:profile_fetch_failed', error)
         console.error('fetch profile failed', error)
+      })
+    this.refreshShareConfig()
+  },
+
+  refreshShareConfig() {
+    get('/share/config')
+      .then((remoteConfig) => {
+        const config = saveShareConfig(remoteConfig)
+        logger.info('share:config_fetch_success', {
+          responseKeys: remoteConfig ? Object.keys(remoteConfig) : [],
+          title: config.title,
+          path: config.path,
+          imageUrl: config.imageUrl
+        })
+      })
+      .catch((error) => {
+        logger.warn('share:config_fetch_failed', error)
+        console.error('fetch share config failed', error)
       })
   },
 
@@ -153,9 +220,6 @@ Page({
   },
 
   onShareAppMessage() {
-    return {
-      title: 'moneyBook - 记录礼金、礼物和请客往来',
-      path: '/pages/index/index'
-    }
+    return buildShareMessage()
   }
 })
