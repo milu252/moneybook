@@ -1,6 +1,7 @@
 const { records, fetchRecords, loadCachedRecords, moveRecordsToTrash } = require('../../../data/records')
 const { track } = require('../../../utils/analytics')
 const { createRecordsWorkbookFile } = require('../../../utils/export-records')
+const { post } = require('../../../utils/request')
 const logger = require('../../../utils/logger')
 
 Page({
@@ -11,6 +12,7 @@ Page({
     clearing: false,
     exporting: false,
     exportPreparing: false,
+    uploadingLog: false,
     actions: [
       { key: 'export', label: '导出数据' },
       { key: 'logs', label: '诊断日志' },
@@ -49,21 +51,13 @@ Page({
     }
 
     if (key === 'logs') {
-      this.shareDiagnosticLog()
+      this.uploadDiagnosticLog()
     }
   },
 
-  shareDiagnosticLog() {
-    logger.info('diagnostic_log:share_click')
-
-    if (typeof wx.shareFileMessage !== 'function') {
-      logger.warn('diagnostic_log:share_not_supported')
-      wx.showToast({
-        title: '当前微信版本不支持文件分享',
-        icon: 'none'
-      })
-      return
-    }
+  async uploadDiagnosticLog() {
+    if (this.data.uploadingLog) return
+    logger.info('diagnostic_log:upload_click')
 
     const filePath = logger.getLogFilePath()
     const content = logger.readTodayLog()
@@ -76,24 +70,41 @@ Page({
       return
     }
 
-    wx.shareFileMessage({
-      filePath,
-      fileName: `moneybook-log-${Date.now()}.log`,
-      success: () => {
-        logger.info('diagnostic_log:share_success', { filePath })
-      },
-      fail: (error) => {
-        logger.error('diagnostic_log:share_failed', {
-          filePath,
-          error
-        })
-        wx.showModal({
-          title: '发送失败',
-          content: '日志文件已生成，可稍后重试。',
-          showCancel: false
-        })
-      }
+    this.setData({ uploadingLog: true })
+    wx.showLoading({
+      title: '日志提交中...',
+      mask: true
     })
+
+    try {
+      await post('/diagnostic-logs', {
+        file_name: filePath.split('/').pop() || `moneybook-log-${Date.now()}.txt`,
+        content,
+        content_length: content.length,
+        client_time: new Date().toISOString()
+      })
+      logger.info('diagnostic_log:upload_success', {
+        filePath,
+        contentLength: content.length
+      })
+      wx.showToast({
+        title: '日志已提交',
+        icon: 'none'
+      })
+    } catch (error) {
+      logger.error('diagnostic_log:upload_failed', {
+        filePath,
+        contentLength: content.length,
+        error
+      })
+      wx.showToast({
+        title: '提交失败，请重试',
+        icon: 'none'
+      })
+    } finally {
+      wx.hideLoading()
+      this.setData({ uploadingLog: false })
+    }
   },
 
   async openExportDialog() {

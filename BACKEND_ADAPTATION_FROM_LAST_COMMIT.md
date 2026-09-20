@@ -450,6 +450,44 @@ POST /analytics/events
 - 即使单个事件字段不完整，也尽量接收并保存原始 JSON。
 - `user_id` 当前来自本地 profile，未必等于后端真实用户 ID。更可靠的用户身份应以后端从 token 解析出的用户为准。
 
+### `POST /diagnostic-logs`
+
+用途：接收用户在【我的】-【数据管理】-【诊断日志】主动提交的前端本地诊断日志，用于排查“点击无效、字段不匹配、图片打不开”等仅靠后端业务日志难以定位的问题。
+
+请求头：
+
+```text
+Authorization: Bearer <token>
+Content-Type: application/json
+```
+
+请求体：
+
+```json
+{
+  "file_name": "moneybook-log-2026-09-15.txt",
+  "content": "{\"time\":\"...\",\"level\":\"info\",\"event\":\"...\"}\n",
+  "content_length": 1234,
+  "client_time": "2026-09-15T12:00:00.000Z"
+}
+```
+
+建议响应：
+
+```json
+{
+  "success": true,
+  "id": "diagnostic-log-id"
+}
+```
+
+后端要求：
+
+- 只接收当前登录用户的日志。
+- 建议限制单次日志大小，例如 1MB 以内。
+- 日志内容可能包含前端页面路径、接口路径、图片 URL、错误摘要等诊断信息；前端已避免上传 token、openid、图片 base64 等敏感内容。
+- 成功返回任意 2xx 状态码即可，前端会提示“日志已提交”。
+
 ### 本次前端已接入的事件名
 
 ```text

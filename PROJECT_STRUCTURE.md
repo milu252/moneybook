@@ -186,8 +186,8 @@
 实现规则：
 
 - 日志文件直接存放在 `wx.env.USER_DATA_PATH/`
-- 按天写入 `moneybook-log-YYYY-MM-DD.log`
-- 单文件超过 512KB 时轮转为 `.log.1`
+- 按天写入 `moneybook-log-YYYY-MM-DD.txt`
+- 单文件超过 512KB 时轮转为 `.txt.1`
 - 默认清理 7 天前日志
 - `token`、`authorization`、`openid`、`session_key`、`password`、图片 base64 `data` 等字段会脱敏或省略
 - `warn` 和 `error` 会尝试同步写入微信实时日志
@@ -517,7 +517,7 @@
 - 点击“导出数据”会生成当前未删除记录的 CSV 文件
 - “本地下载”会尝试打开生成的 CSV 文件并显示系统菜单
 - “发送给好友”会通过 `wx.shareFileMessage` 分享生成的 CSV 文件
-- 点击“诊断日志”会通过 `wx.shareFileMessage` 分享当日本地日志文件，便于排查用户反馈的前端问题
+- 点击“诊断日志”会读取当日本地日志文件，并通过 `POST /diagnostic-logs` 上传到后端，便于排查用户反馈的前端问题
 
 ### `pages/mine/data/trash`
 
