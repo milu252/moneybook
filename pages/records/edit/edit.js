@@ -9,6 +9,7 @@ const {
 } = require('../../../data/records')
 const { getContactRecordById, getContacts } = require('../../../data/contacts')
 const { track } = require('../../../utils/analytics')
+const { processRecordImages } = require('../../../utils/record-image')
 const logger = require('../../../utils/logger')
 
 const weekLabels = ['日', '一', '二', '三', '四', '五', '六']
@@ -478,10 +479,27 @@ Page({
 
     this.setData({ choosingImage: true })
 
-    const onSuccess = (paths) => {
-      this.setData({
-        images: this.data.images.concat(paths).slice(0, 3)
-      })
+    const onSuccess = async (files) => {
+      try {
+        const result = await processRecordImages(files)
+        if (result.rejectedCount > 0) {
+          wx.showToast({
+            title: '图片不能超过5MB',
+            icon: 'none'
+          })
+        } else if (result.compressFailedCount > 0) {
+          wx.showToast({
+            title: '部分图片压缩失败，已使用原图',
+            icon: 'none'
+          })
+        }
+
+        this.setData({
+          images: this.data.images.concat(result.paths).slice(0, 3)
+        })
+      } finally {
+        this.setData({ choosingImage: false })
+      }
     }
 
     if (wx.chooseMedia) {
@@ -489,8 +507,8 @@ Page({
         count: remain,
         mediaType: ['image'],
         sourceType: ['album', 'camera'],
-        success: (res) => onSuccess(res.tempFiles.map((item) => item.tempFilePath)),
-        complete: () => this.setData({ choosingImage: false })
+        success: (res) => onSuccess(res.tempFiles),
+        fail: () => this.setData({ choosingImage: false })
       })
       return
     }
@@ -499,7 +517,7 @@ Page({
       count: remain,
       sourceType: ['album', 'camera'],
       success: (res) => onSuccess(res.tempFilePaths),
-      complete: () => this.setData({ choosingImage: false })
+      fail: () => this.setData({ choosingImage: false })
     })
   },
 

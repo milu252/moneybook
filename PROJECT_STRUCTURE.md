@@ -45,6 +45,7 @@
 │  ├─ export-records.js
 │  ├─ logger.js
 │  ├─ pinyin.js
+│  ├─ record-image.js
 │  └─ request.js
 ├─ pages/
 │  ├─ index/
@@ -241,6 +242,10 @@
 - `account_delete_first_confirm_click`：点击首次弹窗确定按钮，在首次注销确认弹窗中点击确定时触发，携带 `user_id`
 - `account_delete_second_confirm_click`：点击二次弹窗确定按钮，在二次注销确认弹窗中点击确定时触发，携带 `user_id`
 - `account_delete_success`：注销账号成功，后端注销账号成功返回后触发，携带 `user_id`
+
+### `utils/record-image.js`
+
+负责记录表单图片选择后的前端处理：单张图片最大 5MB，500KB 以下不压缩，500KB-2MB 尽量压缩到 500KB 左右，2MB-5MB 尽量压缩到 1MB 左右，并返回可保存或上传的本地临时路径。新建记录和编辑记录页共用该工具。
 
 ## 页面职责
 
