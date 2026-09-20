@@ -25,7 +25,7 @@ function clearToken() {
 
 async function ensureToken(forceRefresh = false) {
   if (forceRefresh) clearToken()
-  if (getToken()) return
+  if (getToken()) return false
   if (loginPromise) return loginPromise
 
   loginPromise = new Promise((resolve, reject) => {
@@ -38,7 +38,7 @@ async function ensureToken(forceRefresh = false) {
             avatar_url: ''
           })
           setToken(result.access_token)
-          resolve()
+          resolve(true)
         } catch (e) {
           console.error('wx login failed', e)
           reject(e)
