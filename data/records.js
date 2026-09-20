@@ -312,6 +312,7 @@ function isUnauthorizedError(error) {
 
 function isPersistableImage(image) {
   const value = `${image || ''}`
+  if (/^https?:\/\/tmp\//.test(value)) return false
   return /^https?:\/\//.test(value) || value.indexOf('/moneybook/api/v1/records/images/') === 0
 }
 
@@ -332,6 +333,11 @@ function getImageContentType(filePath) {
 }
 
 async function uploadRecordImage(filePath) {
+  console.log('[record image] start upload', {
+    filePath,
+    contentType: getImageContentType(filePath)
+  })
+
   const fileSystem = wx.getFileSystemManager()
   const data = fileSystem.readFileSync(filePath, 'base64')
   const result = await requestWithAuthRetry(() => post('/records/images', {
@@ -340,22 +346,69 @@ async function uploadRecordImage(filePath) {
     data
   }))
 
-  return result && result.image_url ? buildUrl(result.image_url) : ''
+  const imageUrl = result && result.image_url ? buildUrl(result.image_url) : ''
+  console.log('[record image] upload result', {
+    filePath,
+    imageUrl,
+    response: result
+  })
+
+  return imageUrl
 }
 
 async function resolvePersistableImages(images) {
-  if (!Array.isArray(images)) return []
+  if (!Array.isArray(images)) {
+    console.log('[record image] skip resolve, images is not array', { images })
+    return []
+  }
+
+  console.log('[record image] resolve start', {
+    count: images.length,
+    images
+  })
 
   const resolvedImages = []
-  for (const image of images.slice(0, 9)) {
+  for (const [index, image] of images.slice(0, 9).entries()) {
     if (isPersistableImage(image)) {
-      resolvedImages.push(buildUrl(`${image || ''}`))
+      const imageUrl = buildUrl(`${image || ''}`)
+      console.log('[record image] skip upload, already persistable', {
+        index,
+        image,
+        imageUrl
+      })
+      resolvedImages.push(imageUrl)
       continue
     }
 
-    const imageUrl = await uploadRecordImage(image)
-    if (imageUrl) resolvedImages.push(imageUrl)
+    console.log('[record image] need upload, local image detected', {
+      index,
+      image
+    })
+
+    try {
+      const imageUrl = await uploadRecordImage(image)
+      if (imageUrl) {
+        resolvedImages.push(imageUrl)
+      } else {
+        console.log('[record image] upload returned empty image_url', {
+          index,
+          image
+        })
+      }
+    } catch (error) {
+      console.error('[record image] upload failed', {
+        index,
+        image,
+        error
+      })
+      throw error
+    }
   }
+
+  console.log('[record image] resolve done', {
+    count: resolvedImages.length,
+    images: resolvedImages
+  })
 
   return resolvedImages
 }
