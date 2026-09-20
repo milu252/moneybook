@@ -145,14 +145,13 @@ Content-Type: application/json
 
 ### `GET /records?include_deleted=true`
 
-用途：获取当前用户全部记录，包括回收站记录。用于回收站和注销账号。
+用途：获取当前用户全部记录，包括回收站记录。
 
 响应体同 `GET /records`，但应包含 `is_deleted: true` 的记录。
 
 后端要求：
 
 - 回收站页面会筛选 `is_deleted === true`。
-- 注销账号流程会对返回的全部记录逐条调用永久删除接口。
 
 ### `POST /records`
 
@@ -232,7 +231,7 @@ Content-Type: application/json
 
 ### `DELETE /records/{id}/permanent`
 
-用途：永久删除记录。回收站永久删除和注销账号都会调用。
+用途：永久删除记录。当前用于回收站永久删除。
 
 响应体建议：
 
@@ -509,12 +508,11 @@ account_delete_success
 1. 用户点击注销账号。
 2. 前端展示第一次确认弹窗。
 3. 前端展示第二次确认弹窗。
-4. 前端调用 `GET /records?include_deleted=true`。
-5. 前端对所有返回记录逐条调用 `DELETE /records/{id}/permanent`。
-6. 前端清空本地缓存和 token。
-7. 前端显示注销成功。
+4. 前端调用 `DELETE /account`。
+5. 后端返回成功后，前端清空本地缓存和 token。
+6. 前端显示注销成功。
 
-当前没有专门的账号注销接口。建议后端新增更完整的接口：
+后端需要提供账号注销接口：
 
 ```text
 DELETE /account
@@ -528,8 +526,6 @@ DELETE /account
 - 使当前 token 失效。
 - 返回 `{ "success": true }`。
 
-如果后端实现了 `DELETE /account`，前端后续可以简化注销流程，避免逐条删除记录。
-
 ## 8. 后端优先级建议
 
 优先做：
@@ -540,7 +536,7 @@ DELETE /account
 4. 支持账号资料接口：`GET /account/profile`、`PATCH /account/profile`、`POST /account/avatar`。
 5. 支持 `POST /feedback`。
 6. 新增 `POST /analytics/events`，再让前端打开 `ANALYTICS_ENDPOINT`。
-7. 设计并实现正式 `DELETE /account`，再让前端替换当前逐条永久删除逻辑。
+7. 实现正式 `DELETE /account`，承接前端账号注销流程。
 
 ## 9. 前端侧注意事项
 

@@ -1,4 +1,4 @@
-const { get, del } = require('../../../utils/request')
+const { del } = require('../../../utils/request')
 const { ensureToken, clearToken } = require('../../../utils/auth')
 const { records } = require('../../../data/records')
 const { track } = require('../../../utils/analytics')
@@ -111,7 +111,7 @@ Page({
     })
 
     try {
-      await this.deleteAllRemoteRecords()
+      await this.deleteRemoteAccount()
       track('account_delete_success')
       this.clearAccountLocalData()
 
@@ -135,13 +135,8 @@ Page({
     }
   },
 
-  async deleteAllRemoteRecords() {
-    const allRecords = await this.requestWithAccountRetry(() => get('/records', { include_deleted: true }))
-    const recordIds = Array.from(new Set((allRecords || []).map((record) => String(record.id)).filter(Boolean)))
-
-    if (!recordIds.length) return
-
-    await Promise.all(recordIds.map((id) => this.requestWithAccountRetry(() => del(`/records/${id}/permanent`))))
+  async deleteRemoteAccount() {
+    await this.requestWithAccountRetry(() => del('/account'))
   },
 
   async requestWithAccountRetry(requester) {

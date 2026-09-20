@@ -540,7 +540,8 @@
 - `sections` 渲染清除缓存、用户协议、隐私政策、注销账号
 - 点击“用户协议”跳转到 `pages/mine/settings/agreement/agreement`
 - 点击“隐私政策”跳转到 `pages/mine/settings/privacy/privacy`
-- 点击入口显示待接入 toast，真实设置逻辑待接入
+- 点击“清除缓存”展示确认弹窗，确认后清空本地缓存
+- 点击“注销账号”展示两次确认弹窗，最终调用 `DELETE /account`，后端成功后清空本地缓存、token 和内存记录，再展示注销成功弹窗
 
 ### `pages/mine/settings/agreement`
 

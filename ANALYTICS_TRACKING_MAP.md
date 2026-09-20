@@ -286,7 +286,7 @@ from=contact_detail
 | `pages/mine/settings/settings.js` | `account_delete_click` | 点击“注销账号”入口 | 无 |
 | `pages/mine/settings/settings.js` | `account_delete_first_confirm_click` | 第一次确认弹窗点击“确定” | 无 |
 | `pages/mine/settings/settings.js` | `account_delete_second_confirm_click` | 第二次确认弹窗点击“确定” | 无 |
-| `pages/mine/settings/settings.js` | `account_delete_success` | 远端记录永久删除、本地数据清理成功后 | 无 |
+| `pages/mine/settings/settings.js` | `account_delete_success` | 账号注销接口成功、本地数据清理成功后 | 无 |
 
 注意：
 
