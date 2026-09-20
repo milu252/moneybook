@@ -1,6 +1,7 @@
 const { getContacts } = require('../../../data/contacts')
 const { addRecord, loadCachedRecords, recordTypes } = require('../../../data/records')
 const { track } = require('../../../utils/analytics')
+const logger = require('../../../utils/logger')
 
 const weekLabels = ['日', '一', '二', '三', '四', '五', '六']
 // yearOptions: 当前年份前后各10年，共21个选项
@@ -559,8 +560,23 @@ Page({
     const typeConfig = recordTypes[this.data.activeType] || recordTypes.cash
     const value = buildValue(this.data.activeType, this.data.giftType, this.data.form)
     const selectedDate = resolveSelectedDate(this.data.form.date, this.data.selectedDate)
+    logger.info('record_create:save_click', {
+      recordType: this.data.activeType,
+      valueClass: this.data.giftType === 'send' ? 'expense' : 'income',
+      fullDate: dateKey(selectedDate),
+      hasScene: !!scene,
+      hasName: !!this.data.form.name.trim(),
+      hasValue: !!value,
+      imageCount: this.data.images.length,
+      remarkLength: `${this.data.form.remark || ''}`.length,
+      from: this.data.from || ''
+    })
 
     if (!scene) {
+      logger.warn('record_create:validation_blocked', {
+        reason: 'missing_scene',
+        recordType: this.data.activeType
+      })
       wx.showToast({
         title: '请选择或输入事由',
         icon: 'none'
@@ -569,6 +585,10 @@ Page({
     }
 
     if (!this.data.form.name.trim()) {
+      logger.warn('record_create:validation_blocked', {
+        reason: 'missing_name',
+        recordType: this.data.activeType
+      })
       wx.showToast({
         title: '请输入对方姓名',
         icon: 'none'
@@ -577,6 +597,10 @@ Page({
     }
 
     if (!value) {
+      logger.warn('record_create:validation_blocked', {
+        reason: 'missing_value',
+        recordType: this.data.activeType
+      })
       wx.showToast({
         title: getEmptyValueToast(this.data.activeType),
         icon: 'none'
@@ -585,6 +609,10 @@ Page({
     }
 
     if (`${this.data.form.remark || ''}`.length > remarkMaxLength) {
+      logger.warn('record_create:validation_blocked', {
+        reason: 'remark_too_long',
+        recordType: this.data.activeType
+      })
       wx.showToast({
         title: '请将内容控制在200字以内哦~',
         icon: 'none'
@@ -613,6 +641,11 @@ Page({
         remark: this.data.form.remark.trim(),
         images: this.data.images
       })
+      logger.info('record_create:save_success', {
+        recordId: savedRecord.id,
+        recordType: savedRecord.typeKey,
+        imageCount: Array.isArray(savedRecord.images) ? savedRecord.images.length : 0
+      })
 
       track('record_create_success', {
         record_id: savedRecord.id,
@@ -625,6 +658,12 @@ Page({
       })
       clearStoredCreateStartTime()
     } catch (error) {
+      logger.error('record_create:save_failed', {
+        recordType: this.data.activeType,
+        imageCount: this.data.images.length,
+        failReason: getSaveFailReason(error),
+        error
+      })
       console.error('save record failed', error)
       track('record_create_fail', {
         record_type: this.data.activeType,

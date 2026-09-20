@@ -1,6 +1,7 @@
 const { records, fetchRecords, loadCachedRecords, moveRecordsToTrash } = require('../../../data/records')
 const { track } = require('../../../utils/analytics')
 const { createRecordsWorkbookFile } = require('../../../utils/export-records')
+const logger = require('../../../utils/logger')
 
 Page({
   data: {
@@ -12,6 +13,7 @@ Page({
     exportPreparing: false,
     actions: [
       { key: 'export', label: '导出数据' },
+      { key: 'logs', label: '诊断日志' },
       { key: 'clear', label: '清空数据' },
       { key: 'trash', label: '回收站' }
     ]
@@ -43,7 +45,55 @@ Page({
       if (this.data.exportPreparing || this.data.exporting) return
       track('data_export_click')
       this.openExportDialog()
+      return
     }
+
+    if (key === 'logs') {
+      this.shareDiagnosticLog()
+    }
+  },
+
+  shareDiagnosticLog() {
+    logger.info('diagnostic_log:share_click')
+
+    if (typeof wx.shareFileMessage !== 'function') {
+      logger.warn('diagnostic_log:share_not_supported')
+      wx.showToast({
+        title: '当前微信版本不支持文件分享',
+        icon: 'none'
+      })
+      return
+    }
+
+    const filePath = logger.getLogFilePath()
+    const content = logger.readTodayLog()
+    if (!filePath || !content) {
+      logger.warn('diagnostic_log:empty')
+      wx.showToast({
+        title: '暂无诊断日志',
+        icon: 'none'
+      })
+      return
+    }
+
+    wx.shareFileMessage({
+      filePath,
+      fileName: `moneybook-log-${Date.now()}.log`,
+      success: () => {
+        logger.info('diagnostic_log:share_success', { filePath })
+      },
+      fail: (error) => {
+        logger.error('diagnostic_log:share_failed', {
+          filePath,
+          error
+        })
+        wx.showModal({
+          title: '发送失败',
+          content: '日志文件已生成，可稍后重试。',
+          showCancel: false
+        })
+      }
+    })
   },
 
   async openExportDialog() {

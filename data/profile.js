@@ -1,5 +1,6 @@
 const { get, patch, post, buildUrl } = require('../utils/request')
 const { ensureToken } = require('../utils/auth')
+const logger = require('../utils/logger')
 
 const PROFILE_STORAGE_KEY = 'moneybook_profile'
 
@@ -53,18 +54,37 @@ function normalizeRemoteProfile(profile) {
 
 async function fetchProfile() {
   await ensureToken()
-  const profile = normalizeRemoteProfile(await get('/account/profile'))
+  const remoteProfile = await get('/account/profile')
+  const profile = normalizeRemoteProfile(remoteProfile)
+  logger.info('profile:fetch_success', {
+    responseKeys: remoteProfile ? Object.keys(remoteProfile) : [],
+    id: profile.id,
+    hasNickname: !!profile.nickname,
+    avatar: profile.avatar
+  })
   saveProfile(profile)
   return profile
 }
 
 async function updateRemoteProfile(profile) {
   await ensureToken()
-  const remoteProfile = await patch('/account/profile', {
+  const payload = {
     nickname: profile.nickname,
     avatar_url: profile.avatarUrl || profile.avatar || ''
+  }
+  logger.info('profile:update_request_ready', {
+    hasNickname: !!payload.nickname,
+    nicknameLength: `${payload.nickname || ''}`.length,
+    avatarUrl: payload.avatar_url || ''
   })
+  const remoteProfile = await patch('/account/profile', payload)
   const normalized = normalizeRemoteProfile(remoteProfile)
+  logger.info('profile:update_response_received', {
+    responseKeys: remoteProfile ? Object.keys(remoteProfile) : [],
+    id: normalized.id,
+    hasNickname: !!normalized.nickname,
+    avatar: normalized.avatar
+  })
   saveProfile(normalized)
   return normalized
 }
@@ -80,6 +100,10 @@ async function uploadAvatar(filePath) {
     : lowerPath.endsWith('.webp')
     ? 'image/webp'
     : 'image/jpeg'
+  logger.info('profile_avatar:upload_start', {
+    filePath,
+    contentType
+  })
 
   const result = await post('/account/avatar', {
     filename: filePath.split('/').pop() || 'avatar.jpg',
@@ -87,7 +111,13 @@ async function uploadAvatar(filePath) {
     data
   })
 
-  return result && result.avatar_url ? buildUrl(result.avatar_url) : ''
+  const avatarUrl = result && result.avatar_url ? buildUrl(result.avatar_url) : ''
+  logger.info('profile_avatar:upload_result', {
+    filePath,
+    avatarUrl,
+    responseKeys: result ? Object.keys(result) : []
+  })
+  return avatarUrl
 }
 
 module.exports = {

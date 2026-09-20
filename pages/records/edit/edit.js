@@ -9,6 +9,7 @@ const {
 } = require('../../../data/records')
 const { getContactRecordById, getContacts } = require('../../../data/contacts')
 const { track } = require('../../../utils/analytics')
+const logger = require('../../../utils/logger')
 
 const weekLabels = ['日', '一', '二', '三', '四', '五', '六']
 const yearOptions = Array.from({ length: 21 }, (_, index) => new Date().getFullYear() - 10 + index)
@@ -520,18 +521,41 @@ Page({
     const typeConfig = recordTypes[this.data.activeType] || recordTypes.cash
     const value = buildValue(this.data.activeType, this.data.giftType, this.data.form)
     const selectedDate = resolveSelectedDate(this.data.form.date, this.data.selectedDate)
+    logger.info('record_edit:save_click', {
+      recordId: this.data.record && this.data.record.id,
+      recordType: this.data.activeType,
+      valueClass: this.data.giftType === 'send' ? 'expense' : 'income',
+      fullDate: dateKey(selectedDate),
+      hasScene: !!scene,
+      hasName: !!this.data.form.name.trim(),
+      hasValue: !!value,
+      imageCount: this.data.images.length,
+      remarkLength: `${this.data.form.remark || ''}`.length
+    })
 
     if (!scene) {
+      logger.warn('record_edit:validation_blocked', {
+        recordId: this.data.record && this.data.record.id,
+        reason: 'missing_scene'
+      })
       wx.showToast({ title: '请选择或输入事由', icon: 'none' })
       return
     }
 
     if (!this.data.form.name.trim()) {
+      logger.warn('record_edit:validation_blocked', {
+        recordId: this.data.record && this.data.record.id,
+        reason: 'missing_name'
+      })
       wx.showToast({ title: '请输入对方姓名', icon: 'none' })
       return
     }
 
     if (!value) {
+      logger.warn('record_edit:validation_blocked', {
+        recordId: this.data.record && this.data.record.id,
+        reason: 'missing_value'
+      })
       wx.showToast({
         title: getEmptyValueToast(this.data.activeType),
         icon: 'none'
@@ -540,6 +564,10 @@ Page({
     }
 
     if (`${this.data.form.remark || ''}`.length > remarkMaxLength) {
+      logger.warn('record_edit:validation_blocked', {
+        recordId: this.data.record && this.data.record.id,
+        reason: 'remark_too_long'
+      })
       wx.showToast({
         title: '请将内容控制在200字以内哦~',
         icon: 'none'
@@ -572,7 +600,18 @@ Page({
         record_id: savedRecord.id,
         record_type: savedRecord.typeKey
       })
+      logger.info('record_edit:save_success', {
+        recordId: savedRecord.id,
+        recordType: savedRecord.typeKey,
+        imageCount: Array.isArray(savedRecord.images) ? savedRecord.images.length : 0
+      })
     } catch (error) {
+      logger.error('record_edit:save_failed', {
+        recordId: this.data.record && this.data.record.id,
+        recordType: this.data.activeType,
+        imageCount: this.data.images.length,
+        error
+      })
       console.error('update record failed', error)
       this.setData({ saving: false })
       wx.showToast({

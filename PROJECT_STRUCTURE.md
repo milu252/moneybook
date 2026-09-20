@@ -43,6 +43,7 @@
 │  ├─ analytics.js
 │  ├─ auth.js
 │  ├─ export-records.js
+│  ├─ logger.js
 │  ├─ pinyin.js
 │  └─ request.js
 ├─ pages/
@@ -168,6 +169,29 @@
 - `device_id`：匿名设备 ID，首次上报时本地生成并缓存，自动放在 `properties` 中
 - `os_type`：系统类型，例如 iOS、Android、devtools，自动放在 `properties` 中
 - `network_type`：当前网络类型，例如 wifi、4g、5g、none、unknown，自动放在 `properties` 中
+
+### `utils/logger.js`
+
+客户端本地日志工具。用于记录关键流程的结构化诊断日志，同时保留控制台输出。
+
+主要导出：
+
+- `init()`：小程序启动时初始化日志目录，并清理过期日志
+- `debug(event, data)` / `info(event, data)` / `warn(event, data)` / `error(event, data)`：写入结构化日志
+- `getLogFilePath()`：获取当日日志文件路径
+- `listLogFiles()`：列出本地日志文件
+- `readTodayLog()`：读取当日日志内容
+- `clearOldLogs()`：清理过期日志
+
+实现规则：
+
+- 日志文件存放在 `wx.env.USER_DATA_PATH/logs/`
+- 按天写入 `YYYY-MM-DD.log`
+- 单文件超过 512KB 时轮转为 `.log.1`
+- 默认清理 7 天前日志
+- `token`、`authorization`、`openid`、`session_key`、`password`、图片 base64 `data` 等字段会脱敏或省略
+- `warn` 和 `error` 会尝试同步写入微信实时日志
+- 当前重点覆盖请求失败/写接口成功、记录新建和编辑、记录图片上传、个人资料拉取和保存、头像上传和头像加载失败等仅靠后端日志难以定位的前端问题
 
 当前已接入事件：
 
@@ -493,6 +517,7 @@
 - 点击“导出数据”会生成当前未删除记录的 CSV 文件
 - “本地下载”会尝试打开生成的 CSV 文件并显示系统菜单
 - “发送给好友”会通过 `wx.shareFileMessage` 分享生成的 CSV 文件
+- 点击“诊断日志”会通过 `wx.shareFileMessage` 分享当日本地日志文件，便于排查用户反馈的前端问题
 
 ### `pages/mine/data/trash`
 

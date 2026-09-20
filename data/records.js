@@ -1,5 +1,6 @@
 const { get, post, patch, del, buildUrl } = require('../utils/request')
 const { ensureToken } = require('../utils/auth')
+const logger = require('../utils/logger')
 
 const RECORDS_CACHE_KEY = 'moneybook_records'
 const CONTACT_RECORD_NAME_STORAGE_KEY = 'moneybook_contact_record_names'
@@ -333,7 +334,7 @@ function getImageContentType(filePath) {
 }
 
 async function uploadRecordImage(filePath) {
-  console.log('[record image] start upload', {
+  logger.info('record_image:upload_start', {
     filePath,
     contentType: getImageContentType(filePath)
   })
@@ -347,7 +348,7 @@ async function uploadRecordImage(filePath) {
   }))
 
   const imageUrl = result && result.image_url ? buildUrl(result.image_url) : ''
-  console.log('[record image] upload result', {
+  logger.info('record_image:upload_result', {
     filePath,
     imageUrl,
     response: result
@@ -358,11 +359,11 @@ async function uploadRecordImage(filePath) {
 
 async function resolvePersistableImages(images) {
   if (!Array.isArray(images)) {
-    console.log('[record image] skip resolve, images is not array', { images })
+    logger.warn('record_image:resolve_skip_not_array', { images })
     return []
   }
 
-  console.log('[record image] resolve start', {
+  logger.info('record_image:resolve_start', {
     count: images.length,
     images
   })
@@ -371,7 +372,7 @@ async function resolvePersistableImages(images) {
   for (const [index, image] of images.slice(0, 9).entries()) {
     if (isPersistableImage(image)) {
       const imageUrl = buildUrl(`${image || ''}`)
-      console.log('[record image] skip upload, already persistable', {
+      logger.info('record_image:upload_skip_persistable', {
         index,
         image,
         imageUrl
@@ -380,7 +381,7 @@ async function resolvePersistableImages(images) {
       continue
     }
 
-    console.log('[record image] need upload, local image detected', {
+    logger.info('record_image:upload_needed_local', {
       index,
       image
     })
@@ -390,13 +391,13 @@ async function resolvePersistableImages(images) {
       if (imageUrl) {
         resolvedImages.push(imageUrl)
       } else {
-        console.log('[record image] upload returned empty image_url', {
+        logger.warn('record_image:upload_empty_url', {
           index,
           image
         })
       }
     } catch (error) {
-      console.error('[record image] upload failed', {
+      logger.error('record_image:upload_failed', {
         index,
         image,
         error
@@ -405,7 +406,7 @@ async function resolvePersistableImages(images) {
     }
   }
 
-  console.log('[record image] resolve done', {
+  logger.info('record_image:resolve_done', {
     count: resolvedImages.length,
     images: resolvedImages
   })
@@ -428,6 +429,22 @@ function buildRecordPayload(record, images) {
   }
 }
 
+function getRecordLogSummary(record, images) {
+  return {
+    id: record && record.id ? String(record.id) : '',
+    typeKey: record && record.typeKey,
+    valueClass: record && record.valueClass,
+    fullDate: record && record.fullDate,
+    scene: record && record.scene,
+    hasName: !!(record && record.name),
+    valueLength: `${(record && record.value) || ''}`.length,
+    remarkLength: `${(record && record.remark) || ''}`.length,
+    inputImageCount: Array.isArray(record && record.images) ? record.images.length : 0,
+    resolvedImageCount: Array.isArray(images) ? images.length : 0,
+    resolvedImages: images || []
+  }
+}
+
 async function requestWithAuthRetry(requester) {
   await ensureToken()
 
@@ -436,6 +453,9 @@ async function requestWithAuthRetry(requester) {
   } catch (error) {
     if (!isUnauthorizedError(error)) throw error
 
+    logger.warn('request:auth_retry', {
+      statusCode: error.statusCode
+    })
     await ensureToken(true)
     return requester()
   }
@@ -443,8 +463,16 @@ async function requestWithAuthRetry(requester) {
 
 async function addRecord(record) {
   const images = await resolvePersistableImages(record.images)
-  const result = await requestWithAuthRetry(() => post('/records', buildRecordPayload(record, images)))
+  const payload = buildRecordPayload(record, images)
+  logger.info('record:create_request_ready', getRecordLogSummary(record, images))
+  const result = await requestWithAuthRetry(() => post('/records', payload))
   const recordId = String(result.id || record.id || Date.now())
+  logger.info('record:create_response_received', {
+    recordId,
+    responseKeys: result ? Object.keys(result) : [],
+    responseImageCount: Array.isArray(result && result.images) ? result.images.length : 0,
+    fallbackImagesUsed: !Array.isArray(result && result.images)
+  })
   removePermanentlyDeletedRecordIds([recordId])
   removeRecordOverrides([recordId])
   removeRecordIdsFromContactNameMap([recordId])
@@ -483,7 +511,15 @@ async function updateRecord(id, record) {
   if (!recordId) throw new Error('记录不存在')
 
   const images = await resolvePersistableImages(record.images)
-  const result = await requestWithAuthRetry(() => patch(`/records/${recordId}`, buildRecordPayload(record, images)))
+  const payload = buildRecordPayload(record, images)
+  logger.info('record:update_request_ready', getRecordLogSummary({ ...record, id: recordId }, images))
+  const result = await requestWithAuthRetry(() => patch(`/records/${recordId}`, payload))
+  logger.info('record:update_response_received', {
+    recordId,
+    responseKeys: result ? Object.keys(result) : [],
+    responseImageCount: Array.isArray(result && result.images) ? result.images.length : 0,
+    fallbackImagesUsed: !Array.isArray(result && result.images)
+  })
   saveRecordOverride(recordId, record)
   const normalized = _normalizeRecord({
     ...result,

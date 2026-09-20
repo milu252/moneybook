@@ -1,5 +1,6 @@
 const { fetchProfile, getProfile } = require('../../data/profile')
 const { track } = require('../../utils/analytics')
+const logger = require('../../utils/logger')
 
 const initialProfile = getProfile()
 
@@ -29,8 +30,16 @@ Page({
     track('mine_page_view')
     this.refreshProfile()
     fetchProfile()
-      .then(() => this.refreshProfile())
+      .then((profile) => {
+        logger.info('mine:profile_fetch_success', {
+          id: profile.id,
+          hasNickname: !!profile.nickname,
+          avatar: profile.avatar
+        })
+        this.refreshProfile()
+      })
       .catch((error) => {
+        logger.error('mine:profile_fetch_failed', error)
         console.error('fetch profile failed', error)
       })
   },
@@ -40,6 +49,13 @@ Page({
     const nextAvatar = profile.avatar || this.data.defaultAvatar
     const currentAvatar = this.data.user.avatar || this.data.defaultAvatar
     const shouldPreloadAvatar = nextAvatar !== currentAvatar
+    logger.info('mine:profile_apply', {
+      id: profile.id,
+      hasNickname: !!profile.nickname,
+      currentAvatar,
+      nextAvatar,
+      shouldPreloadAvatar
+    })
 
     this.setData({
       user: {
@@ -52,6 +68,9 @@ Page({
   },
 
   handleAvatarError() {
+    logger.warn('mine:avatar_load_failed', {
+      avatar: this.data.user.avatar
+    })
     this.setData({
       'user.avatar': this.data.defaultAvatar,
       pendingAvatar: ''
@@ -60,6 +79,9 @@ Page({
 
   handlePendingAvatarLoad() {
     if (!this.data.pendingAvatar) return
+    logger.info('mine:pending_avatar_load_success', {
+      avatar: this.data.pendingAvatar
+    })
 
     this.setData({
       'user.avatar': this.data.pendingAvatar,
@@ -68,6 +90,9 @@ Page({
   },
 
   handlePendingAvatarError() {
+    logger.warn('mine:pending_avatar_load_failed', {
+      avatar: this.data.pendingAvatar
+    })
     this.setData({
       pendingAvatar: ''
     })

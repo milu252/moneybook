@@ -1,3 +1,5 @@
+const logger = require('./logger')
+
 // 本地开发使用这个：
 // const BASE_URL = 'http://127.0.0.1:3000/moneybook/api/v1'
 // 上线使用这个：
@@ -8,6 +10,49 @@ function getToken() {
     return wx.getStorageSync('moneybook_token') || ''
   } catch (e) {
     return ''
+  }
+}
+
+function getPayloadSummary(data) {
+  if (!data || typeof data !== 'object') return data || {}
+
+  const summary = {}
+  Object.keys(data).forEach((key) => {
+    const value = data[key]
+    if (key === 'data') {
+      summary[key] = typeof value === 'string' ? `[omitted:${value.length}]` : '[omitted]'
+    } else if (Array.isArray(value)) {
+      summary[key] = {
+        type: 'array',
+        length: value.length
+      }
+    } else if (value && typeof value === 'object') {
+      summary[key] = {
+        type: 'object',
+        keys: Object.keys(value)
+      }
+    } else {
+      summary[key] = value
+    }
+  })
+  return summary
+}
+
+function getResponseSummary(data) {
+  if (!data || typeof data !== 'object') return data || {}
+  if (Array.isArray(data)) {
+    return {
+      type: 'array',
+      length: data.length
+    }
+  }
+
+  return {
+    keys: Object.keys(data),
+    id: data.id ? String(data.id) : '',
+    image_url: data.image_url || '',
+    avatar_url: data.avatar_url || '',
+    images_count: Array.isArray(data.images) ? data.images.length : undefined
   }
 }
 
@@ -25,9 +70,26 @@ function request(method, path, data) {
       timeout: 15000,
       success(res) {
         if (res.statusCode >= 200 && res.statusCode < 300) {
+          if (method !== 'GET') {
+            logger.info('request:success', {
+              method,
+              path,
+              statusCode: res.statusCode,
+              request: getPayloadSummary(data),
+              response: getResponseSummary(res.data)
+            })
+          }
           resolve(res.data)
           return
         }
+
+        logger.warn('request:bad_status', {
+          method,
+          path,
+          statusCode: res.statusCode,
+          request: getPayloadSummary(data),
+          response: getResponseSummary(res.data)
+        })
 
         reject({
           statusCode: res.statusCode,
@@ -36,6 +98,13 @@ function request(method, path, data) {
         })
       },
       fail(error) {
+        logger.error('request:network_fail', {
+          method,
+          path,
+          request: getPayloadSummary(data),
+          error
+        })
+
         reject({
           statusCode: 0,
           data: error,
