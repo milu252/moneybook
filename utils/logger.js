@@ -1,12 +1,12 @@
-const LOG_DIR_NAME = 'logs'
 const LOG_RETENTION_DAYS = 7
 const MAX_LOG_FILE_SIZE = 512 * 1024
 const MAX_SERIALIZED_LENGTH = 2000
+const LOG_FILE_PREFIX = 'moneybook-log-'
 const SENSITIVE_KEYS = ['token', 'authorization', 'openid', 'session_key', 'password']
 
 let initialized = false
 let fileSystem = null
-let logDir = ''
+let userDataPath = ''
 let realtimeLogger = null
 
 function getFileSystem() {
@@ -15,11 +15,11 @@ function getFileSystem() {
   return fileSystem
 }
 
-function getLogDir() {
-  if (logDir) return logDir
+function getUserDataPath() {
+  if (userDataPath) return userDataPath
   if (typeof wx === 'undefined' || !wx.env || !wx.env.USER_DATA_PATH) return ''
-  logDir = `${wx.env.USER_DATA_PATH}/${LOG_DIR_NAME}`
-  return logDir
+  userDataPath = wx.env.USER_DATA_PATH
+  return userDataPath
 }
 
 function pad(value) {
@@ -31,32 +31,8 @@ function formatDate(date) {
 }
 
 function getLogFilePath(date = new Date()) {
-  const dir = getLogDir()
-  return dir ? `${dir}/${formatDate(date)}.log` : ''
-}
-
-function ensureLogDir() {
-  const fs = getFileSystem()
-  const dir = getLogDir()
-  if (!fs || !dir) return false
-
-  try {
-    fs.accessSync(dir)
-    return true
-  } catch (error) {}
-
-  try {
-    fs.mkdirSync(dir, true)
-    return true
-  } catch (error) {
-    try {
-      fs.mkdirSync(dir)
-      return true
-    } catch (innerError) {
-      console.error('[logger] create log dir failed', innerError)
-      return false
-    }
-  }
+  const dir = getUserDataPath()
+  return dir ? `${dir}/${LOG_FILE_PREFIX}${formatDate(date)}.log` : ''
 }
 
 function safeStringify(value) {
@@ -163,23 +139,29 @@ function rotateIfNeeded(path) {
 function appendEntry(entry) {
   const fs = getFileSystem()
   const path = getLogFilePath()
-  if (!fs || !path || !ensureLogDir()) return
+  if (!fs || !path) return
 
   try {
     rotateIfNeeded(path)
     fs.appendFileSync(path, `${safeStringify(entry)}\n`, 'utf8')
   } catch (error) {
-    console.error('[logger] append log failed', error)
+    try {
+      fs.writeFileSync(path, `${safeStringify(entry)}\n`, 'utf8')
+    } catch (innerError) {
+      console.error('[logger] write log failed', innerError)
+    }
   }
 }
 
 function listLogFiles() {
   const fs = getFileSystem()
-  const dir = getLogDir()
+  const dir = getUserDataPath()
   if (!fs || !dir) return []
 
   try {
-    return fs.readdirSync(dir).map((name) => `${dir}/${name}`)
+    return fs.readdirSync(dir)
+      .filter((name) => name.indexOf(LOG_FILE_PREFIX) === 0)
+      .map((name) => `${dir}/${name}`)
   } catch (error) {
     return []
   }
@@ -187,7 +169,7 @@ function listLogFiles() {
 
 function clearOldLogs() {
   const fs = getFileSystem()
-  if (!fs || !ensureLogDir()) return
+  if (!fs) return
 
   const now = Date.now()
   const maxAge = LOG_RETENTION_DAYS * 24 * 60 * 60 * 1000
@@ -213,7 +195,6 @@ function log(level, event, data) {
 function init() {
   if (initialized) return
   initialized = true
-  ensureLogDir()
   clearOldLogs()
   log('info', 'logger:init', {
     retentionDays: LOG_RETENTION_DAYS,
