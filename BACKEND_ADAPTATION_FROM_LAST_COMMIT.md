@@ -465,7 +465,7 @@ Content-Type: application/json
 
 ```json
 {
-  "file_name": "moneybook-log-2026-09-15.txt",
+  "file_name": "moneybook-log-2026-09-15.log",
   "content": "{\"time\":\"...\",\"level\":\"info\",\"event\":\"...\"}\n",
   "content_length": 1234,
   "client_time": "2026-09-15T12:00:00.000Z"

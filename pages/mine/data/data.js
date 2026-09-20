@@ -78,7 +78,7 @@ Page({
 
     try {
       await post('/diagnostic-logs', {
-        file_name: filePath.split('/').pop() || `moneybook-log-${Date.now()}.txt`,
+        file_name: filePath.split('/').pop() || `moneybook-log-${Date.now()}.log`,
         content,
         content_length: content.length,
         client_time: new Date().toISOString()

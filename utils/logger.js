@@ -32,7 +32,7 @@ function formatDate(date) {
 
 function getLogFilePath(date = new Date()) {
   const dir = getUserDataPath()
-  return dir ? `${dir}/${LOG_FILE_PREFIX}${formatDate(date)}.txt` : ''
+  return dir ? `${dir}/${LOG_FILE_PREFIX}${formatDate(date)}.log` : ''
 }
 
 function safeStringify(value) {

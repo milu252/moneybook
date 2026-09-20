@@ -186,8 +186,8 @@
 实现规则：
 
 - 日志文件直接存放在 `wx.env.USER_DATA_PATH/`
-- 按天写入 `moneybook-log-YYYY-MM-DD.txt`
-- 单文件超过 512KB 时轮转为 `.txt.1`
+- 按天写入 `moneybook-log-YYYY-MM-DD.log`
+- 单文件超过 512KB 时轮转为 `.log.1`
 - 默认清理 7 天前日志
 - `token`、`authorization`、`openid`、`session_key`、`password`、图片 base64 `data` 等字段会脱敏或省略
 - `warn` 和 `error` 会尝试同步写入微信实时日志
