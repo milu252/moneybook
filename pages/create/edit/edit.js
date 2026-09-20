@@ -171,6 +171,18 @@ function clearStoredCreateStartTime() {
   } catch (error) {}
 }
 
+function backToCreateEntry() {
+  const pages = getCurrentPages()
+  if (pages.length > 1) {
+    wx.navigateBack()
+    return
+  }
+
+  wx.redirectTo({
+    url: '/pages/create/create'
+  })
+}
+
 function buildNameSuggestions(keyword) {
   const value = `${keyword || ''}`.trim()
   if (!value) return []
@@ -689,9 +701,7 @@ Page({
         return
       }
 
-      wx.redirectTo({
-        url: '/pages/create/create'
-      })
+      backToCreateEntry()
     }, 800)
   }
 })
