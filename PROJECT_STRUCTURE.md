@@ -253,6 +253,10 @@
 
 负责记录表单图片选择后的前端处理：单张图片最大 5MB，500KB 以下不压缩，500KB-2MB 尽量压缩到 500KB 左右，2MB-5MB 尽量压缩到 1MB 左右，并返回可保存或上传的本地临时路径。新建记录和编辑记录页共用该工具。
 
+### `utils/request.js`
+
+负责后端请求封装、token 请求头注入、URL 拼接和文件上传。普通业务接口使用 `BASE_URL`，记录图片上传和图片地址拼接使用 `IMAGE_BASE_URL`；如果后端图片接口部署在独立端口，只需要把 `IMAGE_BASE_URL` 改成对应地址。记录图片上传使用微信原生 `wx.uploadFile`，字段名为 `file`，请求格式为 `multipart/form-data`。
+
 ## 页面职责
 
 ### `pages/index`

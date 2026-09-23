@@ -4,6 +4,9 @@ const logger = require('./logger')
 // const BASE_URL = 'http://127.0.0.1:3000/moneybook/api/v1'
 // 上线使用这个：
 const BASE_URL = 'https://api.shyren.xyz/moneybook/api/v1'
+// 图片接口如果使用独立端口，可以把这里改成对应地址，例如：
+// const IMAGE_BASE_URL = 'http://127.0.0.1:2524/moneybook/api/v1'
+const IMAGE_BASE_URL = 'https://api.shyren.xyz:2524/moneybook/api/v1'
 
 function getToken() {
   try {
@@ -115,19 +118,89 @@ function request(method, path, data) {
   })
 }
 
+function parseUploadResponse(data) {
+  if (!data) return {}
+  if (typeof data === 'object') return data
+
+  try {
+    return JSON.parse(data)
+  } catch (error) {
+    return {}
+  }
+}
+
+function uploadFile(path, filePath, name = 'file', formData) {
+  return new Promise((resolve, reject) => {
+    const header = {}
+    const token = getToken()
+    if (token) header.Authorization = `Bearer ${token}`
+
+    wx.uploadFile({
+      url: IMAGE_BASE_URL + path,
+      filePath,
+      name,
+      formData: formData || {},
+      header,
+      timeout: 30000,
+      success(res) {
+        const data = parseUploadResponse(res.data)
+        if (res.statusCode >= 200 && res.statusCode < 300) {
+          logger.info('upload:success', {
+            path,
+            statusCode: res.statusCode,
+            filePath,
+            response: getResponseSummary(data)
+          })
+          resolve(data)
+          return
+        }
+
+        logger.warn('upload:bad_status', {
+          path,
+          statusCode: res.statusCode,
+          filePath,
+          response: getResponseSummary(data)
+        })
+
+        reject({
+          statusCode: res.statusCode,
+          data,
+          message: (data && (data.message || data.error)) || '上传失败'
+        })
+      },
+      fail(error) {
+        logger.error('upload:network_fail', {
+          path,
+          filePath,
+          error
+        })
+
+        reject({
+          statusCode: 0,
+          data: error,
+          message: error && error.errMsg ? error.errMsg : '网络异常'
+        })
+      }
+    })
+  })
+}
+
 function buildUrl(path) {
   if (!path) return ''
   if (/^https?:\/\//.test(path)) return path
   if (path[0] !== '/') return `${BASE_URL}/${path}`
   if (path.indexOf('/moneybook/api/v1') === 0) {
-    return BASE_URL.replace('/moneybook/api/v1', '') + path
+    const baseUrl = path.indexOf('/moneybook/api/v1/records/images/') === 0 ? IMAGE_BASE_URL : BASE_URL
+    return baseUrl.replace('/moneybook/api/v1', '') + path
   }
   return BASE_URL + path
 }
 
 module.exports = {
   BASE_URL,
+  IMAGE_BASE_URL,
   buildUrl,
+  uploadFile,
   get: (path, params) => request('GET', path, params),
   post: (path, data) => request('POST', path, data),
   patch: (path, data) => request('PATCH', path, data),

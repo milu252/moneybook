@@ -1,4 +1,4 @@
-const { get, post, patch, del, buildUrl } = require('../utils/request')
+const { get, post, patch, del, buildUrl, uploadFile } = require('../utils/request')
 const { ensureToken } = require('../utils/auth')
 const logger = require('../utils/logger')
 
@@ -326,26 +326,12 @@ function getPersistableImages(images) {
   })
 }
 
-function getImageContentType(filePath) {
-  const lowerPath = `${filePath || ''}`.toLowerCase()
-  if (lowerPath.endsWith('.png')) return 'image/png'
-  if (lowerPath.endsWith('.webp')) return 'image/webp'
-  return 'image/jpeg'
-}
-
 async function uploadRecordImage(filePath) {
   logger.info('record_image:upload_start', {
-    filePath,
-    contentType: getImageContentType(filePath)
+    filePath
   })
 
-  const fileSystem = wx.getFileSystemManager()
-  const data = fileSystem.readFileSync(filePath, 'base64')
-  const result = await requestWithAuthRetry(() => post('/records/images', {
-    filename: filePath.split('/').pop() || 'record.jpg',
-    content_type: getImageContentType(filePath),
-    data
-  }))
+  const result = await requestWithAuthRetry(() => uploadFile('/records/images', filePath, 'file'))
 
   const imageUrl = result && result.image_url ? buildUrl(result.image_url) : ''
   logger.info('record_image:upload_result', {
