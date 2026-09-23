@@ -4,8 +4,6 @@ const logger = require('./logger')
 // const BASE_URL = 'http://127.0.0.1:3000/moneybook/api/v1'
 // 上线使用这个：
 const BASE_URL = 'https://api.shyren.xyz/moneybook/api/v1'
-// 图片接口如果使用独立端口，可以把这里改成对应地址，例如：
-// const IMAGE_BASE_URL = 'http://127.0.0.1:2524/moneybook/api/v1'
 const IMAGE_BASE_URL = BASE_URL
 
 function getToken() {
