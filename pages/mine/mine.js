@@ -6,6 +6,10 @@ const initialProfile = getProfile()
 const SHARE_STORAGE_KEY = 'moneybook_share_config'
 const DEFAULT_SHARE_TITLE = '随礼日记-记录人情往来'
 const DEFAULT_SHARE_PATH = '/pages/index/index'
+const DEFAULT_SHARE_IMAGES = [
+  '/assets/share/money_book.jpg',
+  '/assets/share/my_daily_note.jpg'
+]
 
 function getStoredShareConfig() {
   try {
@@ -21,15 +25,21 @@ function buildShareMessage() {
     title: DEFAULT_SHARE_TITLE,
     path: DEFAULT_SHARE_PATH,
     imageUrl: '',
+    imageUrls: [],
     ...getStoredShareConfig()
   }
+  const remoteImages = Array.isArray(config.imageUrls) ? config.imageUrls : []
+  const imageCandidates = DEFAULT_SHARE_IMAGES
+    .concat(remoteImages)
+    .concat(config.imageUrl ? [config.imageUrl] : [])
+    .filter((imageUrl, index, source) => imageUrl && source.indexOf(imageUrl) === index)
   const message = {
     title: config.title || DEFAULT_SHARE_TITLE,
     path: config.path || DEFAULT_SHARE_PATH
   }
 
-  if (config.imageUrl) {
-    message.imageUrl = config.imageUrl
+  if (imageCandidates.length) {
+    message.imageUrl = imageCandidates[Math.floor(Math.random() * imageCandidates.length)]
   }
 
   return message

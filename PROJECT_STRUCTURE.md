@@ -38,7 +38,8 @@
 ├─ project.private.config.json
 ├─ sitemap.json
 ├─ assets/
-│  └─ icons/
+│  ├─ icons/
+│  └─ share/
 ├─ data/
 │  ├─ records.js
 │  └─ contacts.js
@@ -257,6 +258,10 @@
 
 负责后端请求封装、token 请求头注入、URL 拼接和文件上传。普通业务接口使用 `BASE_URL`，记录图片上传和图片地址拼接使用 `IMAGE_BASE_URL`；如果后端图片接口部署在独立端口，只需要把 `IMAGE_BASE_URL` 改成对应地址。记录图片上传使用微信原生 `wx.uploadFile`，字段名为 `file`，请求格式为 `multipart/form-data`。
 
+### `assets/share`
+
+存放小程序分享给好友时使用的本地预置分享图。当前包含 `money_book.jpg` 和 `my_daily_note.jpg` 两张 5:4 图片；分享时会从这两张本地图和后端 `GET /share/config` 下发的图片候选中随机选择一张，网络慢或接口失败时仍可使用本地预置图。
+
 ## 页面职责
 
 ### `pages/index`
@@ -453,10 +458,11 @@
 核心逻辑：
 
 - `user` 保存用户名、用户 ID 和头像
-- `onShow()` 会先展示本地缓存资料，再从后端刷新账号资料
+- `onShow()` 只展示本地缓存资料；账号资料和分享配置在登录成功后由 `app.js` 拉取并写入本地缓存
 - `menuItems` 渲染分享给好友、关于我们、数据管理、意见反馈、系统设置
 - “关于我们”跳转到 `pages/mine/about/about`
 - “分享给好友”使用 `open-type="share"` 拉起微信转发面板
+- 分享图片会从 `assets/share/` 的两张本地图和后端下发图片中随机选择
 - “数据管理”跳转到 `pages/mine/data/data`
 - “意见反馈”跳转到 `pages/mine/feedback/feedback`
 - “系统设置”跳转到 `pages/mine/settings/settings`

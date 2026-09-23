@@ -9,12 +9,25 @@ const DEFAULT_SHARE_TITLE = '随礼日记-记录人情往来'
 const DEFAULT_SHARE_PATH = '/pages/index/index'
 
 function normalizeShareConfig(config) {
-  const imageUrl = config && (config.image_url || config.imageUrl)
+  const imageUrls = []
+  const remoteImageUrls = config && (config.image_urls || config.imageUrls)
+  const remoteImageUrl = config && (config.image_url || config.imageUrl)
+
+  if (Array.isArray(remoteImageUrls)) {
+    remoteImageUrls.forEach((url) => {
+      if (url) imageUrls.push(buildUrl(url))
+    })
+  }
+
+  if (remoteImageUrl) {
+    imageUrls.push(buildUrl(remoteImageUrl))
+  }
 
   return {
     title: config && config.title ? config.title : DEFAULT_SHARE_TITLE,
     path: config && config.path ? config.path : DEFAULT_SHARE_PATH,
-    imageUrl: imageUrl ? buildUrl(imageUrl) : ''
+    imageUrl: imageUrls[0] || '',
+    imageUrls
   }
 }
 
