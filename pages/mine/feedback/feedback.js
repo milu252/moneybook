@@ -78,6 +78,10 @@ Page({
         category: this.data.selectedType,
         content: this.data.content.trim()
       })
+      track('feedback_submit_success', {
+        feedback_type: this.data.selectedType
+      })
+
       wx.showToast({ title: '提交反馈成功', icon: 'none', duration: 1500 })
       setTimeout(() => wx.navigateBack(), 1500)
     } catch (e) {

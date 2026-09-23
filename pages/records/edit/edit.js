@@ -280,8 +280,7 @@ Page({
     if (!this.data.record) return
     track('record_edit_page_view', {
       record_id: this.data.record.id,
-      record_type: this.data.record.typeKey,
-      from: this.from || ''
+      record_type: this.data.record.typeKey
     })
   },
 
@@ -530,10 +529,6 @@ Page({
 
   async saveRecord() {
     if (this.data.saving || !this.data.record) return
-    track('record_edit_save_click', {
-      record_id: this.data.record.id,
-      record_type: this.data.record.typeKey
-    })
 
     const scene = this.data.selectedSceneTag || this.data.form.scene.trim()
     const typeConfig = recordTypes[this.data.activeType] || recordTypes.cash

@@ -234,9 +234,6 @@ Page({
       track('stats_year_filter_click', {
         record_type: this.data.activeCategory
       })
-      track('stats_year_filter_dialog_view', {
-        record_type: this.data.activeCategory
-      })
     }
 
     this.setData({

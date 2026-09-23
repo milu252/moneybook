@@ -39,6 +39,7 @@ Page({
     }
 
     if (key === 'clear') {
+      track('data_clear_click')
       this.setData({ showClearDataDialog: true })
       return
     }
@@ -279,6 +280,10 @@ Page({
 
     try {
       await moveRecordsToTrash(recordIds)
+      track('data_clear_success', {
+        record_count: recordIds.length
+      })
+
       wx.showToast({ title: '已清空', icon: 'none' })
       this.setData({
         showClearDataDialog: false,

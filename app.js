@@ -44,13 +44,11 @@ function syncLoginData() {
   ])
 }
 
-App({
-  onLaunch(options) {
-    logger.init()
+let foregroundStartTime = 0
 
-    track('mini_program_launch_uv', {
-      scene: options && options.scene ? options.scene : ''
-    })
+App({
+  onLaunch() {
+    logger.init()
 
     ensureToken()
       .then((hasLoggedIn) => {
@@ -63,7 +61,20 @@ App({
       })
   },
 
+  onShow(options) {
+    foregroundStartTime = Date.now()
+
+    track('mini_program_open', {
+      scene: options && options.scene ? options.scene : ''
+    })
+  },
+
   onHide() {
-    track('mini_program_end')
+    if (!foregroundStartTime) return
+
+    track('mini_program_hide', {
+      mini_program_duration_ms: Date.now() - foregroundStartTime
+    })
+    foregroundStartTime = 0
   }
 })

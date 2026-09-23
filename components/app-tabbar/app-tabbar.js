@@ -1,3 +1,5 @@
+const { track } = require('../../utils/analytics')
+
 Component({
   properties: {
     active: {
@@ -19,7 +21,29 @@ Component({
   methods: {
     switchTab(event) {
       const { key, page } = event.currentTarget.dataset
-      if (!page || key === this.data.active || this.switching) return
+      if (!page) return
+
+      if (key === 'index') {
+        track('home_tab_click')
+      }
+
+      if (key === 'stats') {
+        track('stats_tab_click')
+      }
+
+      if (key === 'create') {
+        track('create_tab_click')
+      }
+
+      if (key === 'contacts') {
+        track('contacts_tab_click')
+      }
+
+      if (key === 'mine') {
+        track('mine_tab_click')
+      }
+
+      if (key === this.data.active || this.switching) return
       this.switching = true
       wx.redirectTo({
         url: `/pages/${page}/${page}`,

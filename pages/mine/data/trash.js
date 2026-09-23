@@ -78,14 +78,10 @@ Page({
       return
     }
 
-    const recordCount = this.data.selectedIds.length
     this.setData({ restoring: true })
 
     try {
       await restoreRecordsFromTrash(this.data.selectedIds)
-      track('trash_restore_success', {
-        record_count: recordCount
-      })
 
       wx.showToast({ title: '已恢复', icon: 'none' })
       this.setData({ managing: false, selectedIds: [], allSelected: false, restoring: false }, () => {
@@ -107,14 +103,10 @@ Page({
       return
     }
 
-    const recordCount = this.data.selectedIds.length
     this.setData({ deleting: true })
 
     try {
       await deleteTrashRecords(this.data.selectedIds)
-      track('trash_delete_success', {
-        record_count: recordCount
-      })
 
       wx.showToast({ title: '已删除', icon: 'none' })
       this.setData({ managing: false, selectedIds: [], allSelected: false, deleting: false }, () => {

@@ -105,10 +105,6 @@ Page({
       record_id: this.data.record.id,
       record_type: this.data.record.typeKey
     })
-    track('record_delete_dialog_view', {
-      record_id: this.data.record.id,
-      record_type: this.data.record.typeKey
-    })
 
     this.setData({ showDeleteDialog: true })
   },
