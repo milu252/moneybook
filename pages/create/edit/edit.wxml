@@ -113,9 +113,9 @@
           <view class="counter">{{images.length}}/3</view>
         </view>
         <view class="image-list">
-          <view class="image-thumb" wx:for="{{images}}" wx:key="*this">
+          <view class="image-thumb" wx:for="{{images}}" wx:key="*this" data-index="{{index}}" bindtap="previewImages">
             <image src="{{item}}" mode="aspectFill"></image>
-            <view class="remove" data-index="{{index}}" bindtap="removeImage">×</view>
+            <view class="remove" data-index="{{index}}" catchtap="removeImage">×</view>
           </view>
           <view class="add-photo" wx:if="{{images.length < 3}}" bindtap="chooseImage">
             <view class="camera-mark"><view></view></view>
