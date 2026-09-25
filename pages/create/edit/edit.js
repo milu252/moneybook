@@ -582,17 +582,6 @@ Page({
     })
   },
 
-  previewImages(event) {
-    const index = Number(event.currentTarget.dataset.index)
-    const images = this.data.images || []
-    if (!images.length || Number.isNaN(index)) return
-
-    wx.previewImage({
-      current: images[index],
-      urls: images
-    })
-  },
-
   // 校验表单并保存记录，saving 标志防止重复提交；保存成功后跳转回创建首页
   async saveRecord() {
     if (this.data.saving) return
