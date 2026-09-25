@@ -113,7 +113,8 @@ function buildChartStats(periods, category, selectedYear) {
   const chartHeight = 300
   const chartGroupWidth = 132
   const chartVisibleCount = Math.min(4, Math.max(1, periods.length))
-  const maxValue = Math.max(1, ...periods.flatMap((item) => [item.receive, item.send]))
+  const defaultMaxValue = 4
+  const maxValue = Math.max(defaultMaxValue, ...periods.flatMap((item) => [item.receive, item.send]))
   const chartMax = getNiceChartMax(maxValue, category.unit)
   const yLabels = [4, 3, 2, 1, 0].map((step) => ({
     label: `${Math.round((chartMax / 4) * step)}`,
