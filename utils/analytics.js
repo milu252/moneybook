@@ -82,6 +82,7 @@ async function buildPayload(eventName, properties) {
       device_id: getDeviceId(),
       os_type: getOsType(),
       network_type: networkType,
+      ip: '',
       ...eventProperties
     }
   }
@@ -109,6 +110,7 @@ function track(eventName, properties) {
       timestamp: Date.now(),
       properties: {
         user_id: getUserId(),
+        ip: '',
         ...(properties || {})
       }
     }

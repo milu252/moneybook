@@ -20,6 +20,7 @@
     "device_id": "device_1798450000000_abcd1234",
     "os_type": "ios",
     "network_type": "wifi",
+    "ip": "",
     "record_id": "2026-09-23_xxx_cash",
     "record_type": "cash"
   }
@@ -38,6 +39,7 @@
 | `device_id` | properties | string | 匿名设备 ID，本地生成并缓存 |
 | `os_type` | properties | string | 系统类型，例如 `ios`、`android`、`devtools` |
 | `network_type` | properties | string | 网络类型，例如 `wifi`、`4g`、`5g`、`none`、`unknown` |
+| `ip` | properties | string | 用户 IP；前端默认传空字符串，建议后端从请求来源解析并补全 |
 
 ## 事件清单
 
@@ -181,6 +183,7 @@
 | `page_path` | string | 页面路径 |
 | `os_type` | string | 系统类型 |
 | `network_type` | string | 网络类型 |
+| `ip` | string | 用户 IP，建议后端解析 `X-Forwarded-For` / `X-Real-IP` 或连接来源 |
 | `properties` | json | 完整业务参数 |
 | `created_at` | datetime | 服务端接收时间 |
 
@@ -207,6 +210,7 @@
 
 - `user_id` 是主要用户去重字段；如果存在未登录或空 `user_id`，可用 `device_id` 作为兜底。
 - `timestamp` 是客户端时间，后端建议同时记录服务端接收时间 `created_at`。
+- `ip` 建议以后端解析结果为准。前端小程序无法可靠获取公网 IP，当前会上报空字符串占位。
 - `properties` 中的文本字段不应包含用户输入的敏感长文本；当前意见反馈只上报 `feedback_type`，不上报反馈内容。
 - `mini_program_open` 表示进入前台，不只包括冷启动，也包括从后台切回。
 - `mini_program_hide` 表示进入后台，不等同于用户真正关闭小程序。

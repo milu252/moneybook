@@ -174,6 +174,7 @@
 - `device_id`：匿名设备 ID，首次上报时本地生成并缓存，自动放在 `properties` 中
 - `os_type`：系统类型，例如 iOS、Android、devtools，自动放在 `properties` 中
 - `network_type`：当前网络类型，例如 wifi、4g、5g、none、unknown，自动放在 `properties` 中
+- `ip`：用户 IP，自动放在 `properties` 中；前端默认传空字符串，建议后端从请求来源解析并补全
 
 ### `utils/logger.js`
 
