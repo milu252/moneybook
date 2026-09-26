@@ -1,7 +1,8 @@
-const { del } = require('../../../utils/request')
+const { del, post } = require('../../../utils/request')
 const { ensureToken, clearToken } = require('../../../utils/auth')
 const { records } = require('../../../data/records')
 const { track } = require('../../../utils/analytics')
+const logger = require('../../../utils/logger')
 
 Page({
   data: {
@@ -11,11 +12,13 @@ Page({
     showCancelAccountSuccessDialog: false,
     showCancelAccountToast: false,
     cancelingAccount: false,
+    uploadingLog: false,
     sections: [
       {
         title: '缓存管理',
         items: [
-          { key: 'clear-cache', label: '清除缓存' }
+          { key: 'clear-cache', label: '清除缓存' },
+          { key: 'logs', label: '诊断日志' }
         ]
       },
       {
@@ -40,6 +43,11 @@ Page({
 
     if (key === 'clear-cache') {
       this.setData({ showClearCacheDialog: true })
+      return
+    }
+
+    if (key === 'logs') {
+      this.uploadDiagnosticLog()
       return
     }
 
@@ -80,6 +88,58 @@ Page({
       title: '缓存已清除',
       icon: 'none'
     })
+  },
+
+  async uploadDiagnosticLog() {
+    if (this.data.uploadingLog) return
+    logger.info('diagnostic_log:upload_click')
+
+    const filePath = logger.getLogFilePath()
+    const content = logger.readTodayLog()
+    if (!filePath || !content) {
+      logger.warn('diagnostic_log:empty')
+      wx.showToast({
+        title: '暂无诊断日志',
+        icon: 'none'
+      })
+      return
+    }
+
+    this.setData({ uploadingLog: true })
+    wx.showLoading({
+      title: '日志提交中...',
+      mask: true
+    })
+
+    try {
+      await post('/diagnostic-logs', {
+        file_name: filePath.split('/').pop() || `moneybook-log-${Date.now()}.log`,
+        content,
+        content_length: content.length,
+        client_time: new Date().toISOString()
+      })
+      logger.info('diagnostic_log:upload_success', {
+        filePath,
+        contentLength: content.length
+      })
+      wx.showToast({
+        title: '日志已提交',
+        icon: 'none'
+      })
+    } catch (error) {
+      logger.error('diagnostic_log:upload_failed', {
+        filePath,
+        contentLength: content.length,
+        error
+      })
+      wx.showToast({
+        title: '提交失败，请重试',
+        icon: 'none'
+      })
+    } finally {
+      wx.hideLoading()
+      this.setData({ uploadingLog: false })
+    }
   },
 
   closeCancelAccountDialog() {
