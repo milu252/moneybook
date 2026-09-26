@@ -145,6 +145,14 @@ page {
   white-space: normal;
 }
 
+.remark-value text:first-child,
+.remark-value.long text:first-child {
+  max-width: 100%;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  word-break: break-all;
+}
+
 .wrap-value.income {
   color: #247540;
 }

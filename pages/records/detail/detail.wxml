@@ -27,7 +27,7 @@
       </view>
       <view class="info-row wrap-row" wx:if="{{record.hasRemark}}">
         <text class="info-label">备注</text>
-        <view class="wrap-value {{record.remarkClass}}">
+        <view class="wrap-value remark-value {{record.remarkClass}}">
           <text>{{record.remark}}</text>
         </view>
       </view>
@@ -64,7 +64,7 @@
       </view>
       <view class="info-row wrap-row" wx:if="{{record.hasRemark}}">
         <text class="info-label">备注</text>
-        <view class="wrap-value {{record.remarkClass}}">
+        <view class="wrap-value remark-value {{record.remarkClass}}">
           <text>{{record.remark}}</text>
         </view>
       </view>
@@ -101,7 +101,7 @@
       </view>
       <view class="info-row wrap-row" wx:if="{{record.hasRemark}}">
         <text class="info-label">备注</text>
-        <view class="wrap-value {{record.remarkClass}}">
+        <view class="wrap-value remark-value {{record.remarkClass}}">
           <text>{{record.remark}}</text>
         </view>
       </view>

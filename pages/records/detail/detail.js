@@ -12,6 +12,10 @@ function needsWrap(text) {
   return getTextVisualLength(text) > 34
 }
 
+function needsRemarkWrap(text) {
+  return getTextVisualLength(text) > 28
+}
+
 Page({
   data: {
     record: null,
@@ -62,7 +66,7 @@ Page({
     const cost = `${record.cost || ''}`.trim()
     const longValue = needsWrap(value)
     const longScene = needsWrap(scene)
-    const longRemark = needsWrap(remark)
+    const longRemark = needsRemarkWrap(remark)
 
     this.setData({
       record: {
