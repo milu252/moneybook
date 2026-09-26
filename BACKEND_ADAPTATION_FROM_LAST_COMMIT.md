@@ -287,7 +287,7 @@ POST /media/upload-credentials
 
 ## 4. 账号资料与头像接口
 
-当前前端已经接入个人资料远程读取、更新和头像上传，相关逻辑在 `data/profile.js`、`pages/mine/mine.js` 和 `pages/mine/profile/edit/edit.js`。
+当前前端已经接入个人资料远程读取、头像上传和昵称更新，相关逻辑在 `data/profile.js`、`pages/mine/mine.js` 和 `pages/mine/profile/edit/edit.js`。
 
 ### 资料对象字段
 
@@ -338,18 +338,25 @@ POST /media/upload-credentials
 
 ### `PATCH /account/profile`
 
-用途：保存个人资料编辑页的昵称和头像地址。
+用途：保存个人资料编辑页的昵称。前端只在昵称实际变化且头像上传审核通过后调用本接口；头像已通过 `POST /account/avatar` 独立保存，不会重复提交 `avatar_url`。
 
-请求体：
+仅修改昵称时的请求体：
 
 ```json
 {
-  "nickname": "新的昵称",
-  "avatar_url": "/uploads/avatars/user-123.jpg"
+  "nickname": "新的昵称"
 }
 ```
 
-响应体建议返回更新后的完整资料对象：
+清空头像并恢复默认头像时的请求体：
+
+```json
+{
+  "avatar_url": ""
+}
+```
+
+响应体建议返回当前已生效的合法资料对象：
 
 ```json
 {
@@ -359,15 +366,32 @@ POST /media/upload-credentials
 }
 ```
 
+如果昵称或头像审核不通过，响应体仍应返回当前已生效的合法资料，即上一次合法昵称和/或上一次合法头像，同时通过 `invalid_fields` 标记非法字段。可以返回 2xx，也可以返回 400/422，前端都会按业务校验结果处理：
+
+```json
+{
+  "id": "1234567",
+  "nickname": "上一次合法昵称",
+  "avatar_url": "/uploads/avatars/last-valid-avatar.jpg",
+  "invalid_fields": {
+    "nickname": "昵称包含违规内容",
+    "avatar_url": "头像不符合规范"
+  }
+}
+```
+
 后端要求：
 
 - 需要鉴权，只能更新当前用户。
+- `nickname` 未传时应保持原昵称不变。
 - `nickname` 建议限制长度并去除首尾空白。
-- `avatar_url` 可以为空字符串，表示使用默认头像。
+- `avatar_url` 未传时应保持原头像不变。
+- `avatar_url` 为空字符串表示使用默认头像。
+- 审核不通过时，不要把非法昵称或非法头像地址返回为当前生效资料字段；应在 `nickname` / `avatar_url` 中返回上一次合法值，并在 `invalid_fields` 中说明具体非法字段。
 
 ### `POST /account/avatar`
 
-用途：上传微信 `chooseAvatar` 返回的本地头像文件。
+用途：上传微信 `chooseAvatar` 返回的本地头像文件。前端点击保存后会先调用本接口；仅当头像审核通过并返回 `avatar_url` 后，才继续保存昵称。
 
 请求体：
 
@@ -379,13 +403,7 @@ POST /media/upload-credentials
 }
 ```
 
-字段说明：
-
-- `filename`：前端从本地文件路径末尾截取，取不到时使用 `avatar.jpg`。
-- `content_type`：前端根据扩展名识别为 `image/png`、`image/webp` 或 `image/jpeg`。
-- `data`：图片文件的 base64 字符串，不带 data URL 前缀。
-
-响应体：
+审核通过时响应：
 
 ```json
 {
@@ -393,12 +411,24 @@ POST /media/upload-credentials
 }
 ```
 
+审核不通过时，建议返回 `400` 或 `422`，并在响应体提供头像错误和当前合法资料：
+
+```json
+{
+  "id": "1234567",
+  "nickname": "上一次合法昵称",
+  "avatar_url": "/uploads/avatars/last-valid-avatar.jpg",
+  "invalid_fields": {
+    "avatar_url": "头像不符合规范"
+  }
+}
+```
+
 后端要求：
 
-- 需要鉴权。
-- 校验图片大小、类型和 base64 合法性。
-- 保存图片后返回可被小程序直接加载的 `avatar_url`。
-- 建议服务端统一转码、压缩和限制尺寸，避免过大头像影响“我的”页面加载。
+- 需要鉴权，并校验图片大小、类型和 base64 合法性。
+- 审核不通过时，不应保存新头像；前端会立即停止后续昵称请求并展示错误信息。
+- 保存成功后返回可被小程序直接加载的 `avatar_url`。
 
 ## 5. 反馈接口
 
@@ -622,4 +652,4 @@ DELETE /account
 - 记录图片上传接口尚未接入；当前记录表单只有已经是 URL 的图片会提交到后端。
 - 联系人没有独立后端表，联系人列表由记录中的 `name` 动态派生。
 - 个人资料会保存在本地缓存，同时会通过 `GET /account/profile` 和 `PATCH /account/profile` 与后端同步。
-- 头像上传已经接入 `POST /account/avatar`，请求体使用 JSON + base64，不是 multipart/form-data。
+- 头像先通过 `POST /account/avatar` 保存，请求体使用 JSON + base64，不是 multipart/form-data；审核通过后才会继续保存昵称。
