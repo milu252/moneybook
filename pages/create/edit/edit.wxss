@@ -18,14 +18,14 @@ page {
 }
 
 .top-space {
-  height: calc(150rpx + env(safe-area-inset-top));
+  height: calc(166rpx + env(safe-area-inset-top));
   flex: none;
 }
 
 .back-btn {
   position: absolute;
   left: 34rpx;
-  top: calc(88rpx + env(safe-area-inset-top));
+  top: calc(104rpx + env(safe-area-inset-top));
   width: 48rpx;
   height: 48rpx;
   z-index: 5;
