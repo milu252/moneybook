@@ -3,7 +3,7 @@
 本文档根据前端最近一次提交 `0a24f8d 头像加载问题修复` 整理，用于交接后端开发。前端项目基础请求地址当前为：
 
 ```text
-https://api.shyren.xyz/moneybook/api/v1
+https://www.zxlmoney.online/moneybook/api/v1
 ```
 
 当前前端已经接入登录鉴权、记录 CRUD、反馈、账号资料、头像上传、全局埋点和账号注销流程。最近一次提交修复了“我的”页面头像切换加载问题：当前端从 `GET /account/profile` 获取到新的 `avatar_url` 后，会先用默认头像占位，再预加载远程头像，加载成功后替换显示。因此后端需要保证头像 URL 可稳定访问，并返回前端可通过 `buildUrl()` 解析的路径。后端需要重点确认并适配以下接口。
@@ -272,8 +272,8 @@ Content-Type: application/json
 
 - 如果是完整 `http/https` URL，前端直接使用。
 - 如果以 `/moneybook/api/v1` 开头，前端会替换为当前接口域名根路径。
-- 如果是其他 `/` 开头路径，前端会拼到 `https://api.shyren.xyz/moneybook/api/v1` 后面。
-- 如果不是 `/` 开头，前端会拼到 `https://api.shyren.xyz/moneybook/api/v1/` 后面。
+- 如果是其他 `/` 开头路径，前端会拼到 `https://www.zxlmoney.online/moneybook/api/v1` 后面。
+- 如果不是 `/` 开头，前端会拼到 `https://www.zxlmoney.online/moneybook/api/v1/` 后面。
 
 最近一次提交的头像加载修复依赖远程头像地址可被小程序 `<image>` 正常加载。建议后端返回长期有效、公开可读或在小程序环境中可访问的图片 URL，不要返回需要额外自定义请求头才能访问的地址。
 

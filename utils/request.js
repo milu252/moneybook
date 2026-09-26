@@ -3,7 +3,10 @@ const logger = require('./logger')
 // 本地开发使用这个：
 // const BASE_URL = 'http://127.0.0.1:3000/moneybook/api/v1'
 // 上线使用这个：
-const BASE_URL = 'https://api.shyren.xyz/moneybook/api/v1'
+// 国外服务器
+// const BASE_URL = 'https://api.shyren.xyz/moneybook/api/v1'
+// 国内服务器
+const BASE_URL = 'https://www.zxlmoney.online/moneybook/api/v1'
 const IMAGE_BASE_URL = BASE_URL
 
 function getToken() {
