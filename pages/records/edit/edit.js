@@ -505,6 +505,7 @@ Page({
       wx.chooseMedia({
         count: remain,
         mediaType: ['image'],
+        sizeType: ['original'],
         sourceType: ['album', 'camera'],
         success: (res) => onSuccess(res.tempFiles),
         fail: () => this.setData({ choosingImage: false })
@@ -514,6 +515,7 @@ Page({
 
     wx.chooseImage({
       count: remain,
+      sizeType: ['original'],
       sourceType: ['album', 'camera'],
       success: (res) => onSuccess(res.tempFilePaths),
       fail: () => this.setData({ choosingImage: false })
