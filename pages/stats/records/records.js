@@ -7,10 +7,6 @@ const categories = {
   meal: '请客'
 }
 
-function normalizePeriodLabel(period) {
-  return period.length === 7 ? period.replace('-', '.') : period
-}
-
 function sortByDateDesc(sourceRecords) {
   return sourceRecords
     .map((record, index) => ({ record, index }))
@@ -31,7 +27,6 @@ function filterRecords(type, period) {
 
 Page({
   data: {
-    title: '来往记录',
     yearGroups: []
   },
 
@@ -43,8 +38,6 @@ Page({
     track('stats_records_page_view', {
       record_type: type
     })
-    this.setData({ title: `${normalizePeriodLabel(period)}${categories[type]}记录` })
-
     loadCachedRecords()
     this.refreshList()
 

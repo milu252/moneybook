@@ -1,4 +1,4 @@
-<navigation-bar title="{{title}}" color="#111111" background="#fbf5ec"></navigation-bar>
+<navigation-bar title="记录列表" color="#111111" background="#fbf5ec"></navigation-bar>
 
 <view class="stats-records-page">
   <scroll-view class="records-scroll" scroll-y enhanced show-scrollbar="{{false}}">
