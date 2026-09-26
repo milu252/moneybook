@@ -261,7 +261,7 @@
 
 ### `assets/share`
 
-存放小程序分享给好友时使用的本地预置分享图。当前包含 `money_book.jpg` 和 `my_daily_note.jpg` 两张 5:4 图片；分享时会从这两张本地图和后端 `GET /share/config` 下发的图片候选中随机选择一张，网络慢或接口失败时仍可使用本地预置图。
+存放小程序分享给好友时使用的本地预置分享图。当前包含 `money_book.jpg` 和 `my_daily_note.jpg` 两张 5:4 图片；分享时只会从这两张本地图中随机选择一张，不再依赖后端下发分享图片。
 
 ## 页面职责
 
@@ -459,11 +459,11 @@
 核心逻辑：
 
 - `user` 保存用户名、用户 ID 和头像
-- `onShow()` 只展示本地缓存资料；账号资料和分享配置在登录成功后由 `app.js` 拉取并写入本地缓存
+- `onShow()` 只展示本地缓存资料；账号资料在登录成功后由 `app.js` 拉取并写入本地缓存
 - `menuItems` 渲染分享给好友、关于我们、数据管理、意见反馈、系统设置
 - “关于我们”跳转到 `pages/mine/about/about`
 - “分享给好友”使用 `open-type="share"` 拉起微信转发面板
-- 分享图片会从 `assets/share/` 的两张本地图和后端下发图片中随机选择
+- 分享图片会从 `assets/share/` 的两张本地图中随机选择，不请求后端分享图片
 - “数据管理”跳转到 `pages/mine/data/data`
 - “意见反馈”跳转到 `pages/mine/feedback/feedback`
 - “系统设置”跳转到 `pages/mine/settings/settings`
