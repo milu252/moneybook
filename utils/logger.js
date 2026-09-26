@@ -2,7 +2,7 @@ const LOG_RETENTION_DAYS = 7
 const MAX_LOG_FILE_SIZE = 512 * 1024
 const MAX_SERIALIZED_LENGTH = 2000
 const LOG_FILE_PREFIX = 'moneybook-log-'
-const SENSITIVE_KEYS = ['token', 'authorization', 'openid', 'session_key', 'password']
+const SENSITIVE_KEYS = ['token', 'authorization', 'openid', 'session_key', 'password', 'tmpsecretid', 'tmpsecretkey', 'sessiontoken', 'credentials']
 
 let initialized = false
 let fileSystem = null

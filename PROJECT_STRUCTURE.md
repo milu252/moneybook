@@ -48,6 +48,7 @@
 │  ├─ auth.js
 │  ├─ export-records.js
 │  ├─ logger.js
+│  ├─ cos-upload.js
 │  ├─ pinyin.js
 │  ├─ record-image.js
 │  └─ request.js
@@ -255,9 +256,13 @@
 
 负责记录表单图片选择后的前端处理：单张图片最大 5MB，500KB 以下不压缩，500KB-2MB 尽量压缩到 500KB 左右，2MB-5MB 尽量压缩到 1MB 左右，并返回可保存或上传的本地临时路径。新建记录和编辑记录页共用该工具。
 
+### `utils/cos-upload.js`
+
+负责记录图片的 COS 直传。它会识别本地图片类型，使用后端下发的短期 STS 凭证调用 `cos-wx-sdk-v5` 将图片上传到服务端指定的唯一对象路径，并在成功后返回 CDN 图片地址。前端不会保存或输出临时密钥；凭证仅在一次上传期间保留在内存中。
+
 ### `utils/request.js`
 
-负责后端请求封装、token 请求头注入、URL 拼接和文件上传。普通业务接口使用 `BASE_URL`，记录图片上传和图片地址拼接使用 `IMAGE_BASE_URL`；如果后端图片接口部署在独立端口，只需要把 `IMAGE_BASE_URL` 改成对应地址。记录图片上传使用微信原生 `wx.uploadFile`，字段名为 `file`，请求格式为 `multipart/form-data`。
+负责后端 JSON 请求封装、token 请求头注入和 URL 拼接。记录图片不再经由后端文件上传接口，而是由 `utils/cos-upload.js` 使用后端签发的短期凭证直传 COS。
 
 ### `assets/share`
 
@@ -714,8 +719,8 @@ Tab：
 ## 重要注意事项
 
 - 项目文件是 UTF-8 编码。PowerShell 默认 `Get-Content` 可能显示中文乱码，读取时建议使用 `Get-Content -Encoding UTF8`。
-- 当前目录不是 Git 仓库，无法通过 `git status` 或提交历史判断变更来源。
-- 代码里没有 npm 依赖和构建脚本，主要应通过微信开发者工具打开项目。
+- 当前目录是 Git 仓库，提交前请使用 `git status --short` 和 `git diff --stat` 检查变更。
+- 项目通过 npm 管理 `cos-wx-sdk-v5`。依赖变更后需要在微信开发者工具中执行“工具 -> 构建 npm”，再进行真机或开发者工具验证。
 - 如果要做数据写入功能，优先先决定数据源方案：本地缓存、云开发数据库、还是自建接口。
 - 联系人数据由记录动态派生；如果后续接入云端联系人表，需要重新确认联系人 ID 与记录中姓名字段的关系。
 

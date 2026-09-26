@@ -111,6 +111,45 @@ Content-Type: application/json
 - `is_deleted`：是否已进入回收站。
 - `deleted_at`：删除时间，可为空。
 
+### 记录图片直传
+
+前端新增记录或编辑记录时，会先为每张本地图片调用以下接口获取一次性的 COS 上传凭证，再直接上传 COS。上传成功后，前端才将响应中的 `image_url`（CDN 地址）放入 `POST /records` 或 `PATCH /records/{id}` 的 `images` 字段。已有的 `http/https` 图片地址会直接保留，不重复上传。
+
+```text
+POST /media/upload-credentials
+```
+
+请求体：
+
+```json
+{
+  "purpose": "record",
+  "content_type": "image/jpeg"
+}
+```
+
+`content_type` 仅使用 `image/jpeg`、`image/png` 或 `image/webp`。接口需要 Bearer Token 鉴权，并返回服务端指定的对象路径和仅用于该对象 `PutObject` 的短期凭证：
+
+```json
+{
+  "bucket": "example-1250000000",
+  "region": "ap-guangzhou",
+  "object_key": "records/123/2026/09/uuid.jpg",
+  "image_url": "https://img.zxlmoney.online/records/123/2026/09/uuid.jpg",
+  "content_type": "image/jpeg",
+  "max_size_bytes": 5242880,
+  "start_time": 1780000000,
+  "expired_time": 1780001800,
+  "credentials": {
+    "tmpSecretId": "...",
+    "tmpSecretKey": "...",
+    "sessionToken": "..."
+  }
+}
+```
+
+前端通过 `cos-wx-sdk-v5` 的 `putObject` 上传本地文件。后端不得返回永久 COS 密钥，也不应授予列举、读取、删除或通配路径权限。旧的 `POST /records/images` 接口不再由前端调用。
+
 ### `GET /records`
 
 用途：获取当前用户未删除记录。

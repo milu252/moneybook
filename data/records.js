@@ -1,5 +1,6 @@
-const { get, post, patch, del, buildUrl, uploadFile } = require('../utils/request')
+const { get, post, patch, del } = require('../utils/request')
 const { ensureToken } = require('../utils/auth')
+const { getRecordImageContentType, uploadRecordImageToCos } = require('../utils/cos-upload')
 const logger = require('../utils/logger')
 
 const RECORDS_CACHE_KEY = 'moneybook_records'
@@ -314,16 +315,7 @@ function isUnauthorizedError(error) {
 function isPersistableImage(image) {
   const value = `${image || ''}`
   if (/^https?:\/\/tmp\//.test(value)) return false
-  return /^https?:\/\//.test(value) || value.indexOf('/moneybook/api/v1/records/images/') === 0
-}
-
-function getPersistableImages(images) {
-  if (!Array.isArray(images)) return []
-
-  return images.filter(isPersistableImage).map((image) => {
-    const value = `${image || ''}`
-    return value.indexOf('/moneybook/api/v1/records/images/') === 0 ? buildUrl(value) : value
-  })
+  return /^https?:\/\//.test(value)
 }
 
 async function uploadRecordImage(filePath) {
@@ -331,13 +323,16 @@ async function uploadRecordImage(filePath) {
     filePath
   })
 
-  const result = await requestWithAuthRetry(() => uploadFile('/records/images', filePath, 'file'))
-
-  const imageUrl = result && result.image_url ? buildUrl(result.image_url) : ''
+  const contentType = await getRecordImageContentType(filePath)
+  const credentials = await requestWithAuthRetry(() => post('/media/upload-credentials', {
+    purpose: 'record',
+    content_type: contentType
+  }))
+  const imageUrl = await uploadRecordImageToCos(filePath, contentType, credentials)
   logger.info('record_image:upload_result', {
     filePath,
-    imageUrl,
-    response: result
+    contentType,
+    imageUrl
   })
 
   return imageUrl
@@ -357,7 +352,7 @@ async function resolvePersistableImages(images) {
   const resolvedImages = []
   for (const [index, image] of images.slice(0, 9).entries()) {
     if (isPersistableImage(image)) {
-      const imageUrl = buildUrl(`${image || ''}`)
+      const imageUrl = `${image || ''}`
       logger.info('record_image:upload_skip_persistable', {
         index,
         image,
