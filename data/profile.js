@@ -6,7 +6,7 @@ const PROFILE_STORAGE_KEY = 'moneybook_profile'
 
 const defaultProfile = {
   nickname: '微信用户',
-  id: '1234567',
+  id: '00000000',
   avatar: '/assets/icons/default-avatar.svg'
 }
 
