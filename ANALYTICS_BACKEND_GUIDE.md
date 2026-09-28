@@ -16,7 +16,7 @@
   "timestamp": 1798450000000,
   "page_path": "pages/create/edit/edit",
   "properties": {
-    "user_id": "1234567",
+    "user_id": "00000000",
     "device_id": "device_1798450000000_abcd1234",
     "os_type": "ios",
     "network_type": "wifi",

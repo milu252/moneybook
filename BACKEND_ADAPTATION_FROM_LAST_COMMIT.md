@@ -295,7 +295,7 @@ POST /media/upload-credentials
 
 ```json
 {
-  "id": "1234567",
+  "id": "00000000",
   "nickname": "微信用户",
   "avatar_url": "/uploads/avatars/user-123.jpg"
 }
@@ -324,7 +324,7 @@ POST /media/upload-credentials
 
 ```json
 {
-  "id": "1234567",
+  "id": "00000000",
   "nickname": "微信用户",
   "avatar_url": "/uploads/avatars/user-123.jpg"
 }
@@ -360,7 +360,7 @@ POST /media/upload-credentials
 
 ```json
 {
-  "id": "1234567",
+  "id": "00000000",
   "nickname": "新的昵称",
   "avatar_url": "/uploads/avatars/user-123.jpg"
 }
@@ -370,7 +370,7 @@ POST /media/upload-credentials
 
 ```json
 {
-  "id": "1234567",
+  "id": "00000000",
   "nickname": "上一次合法昵称",
   "avatar_url": "/uploads/avatars/last-valid-avatar.jpg",
   "invalid_fields": {
@@ -415,7 +415,7 @@ POST /media/upload-credentials
 
 ```json
 {
-  "id": "1234567",
+  "id": "00000000",
   "nickname": "上一次合法昵称",
   "avatar_url": "/uploads/avatars/last-valid-avatar.jpg",
   "invalid_fields": {
@@ -489,7 +489,7 @@ POST /analytics/events
   "timestamp": 1788286400000,
   "page_path": "pages/create/edit/edit",
   "properties": {
-    "user_id": "1234567",
+    "user_id": "00000000",
     "device_id": "device_1788286400000_abcd1234",
     "os_type": "ios",
     "network_type": "wifi",
