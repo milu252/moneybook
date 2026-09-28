@@ -1,6 +1,7 @@
 const { records, findRecordById, moveRecordToTrash, fetchRecords, refreshRecordDisplayNames } = require('../../../data/records')
 const { getContactRecordById } = require('../../../data/contacts')
 const { track } = require('../../../utils/analytics')
+const { isPermissionDenied, guideToPhotoPermission } = require('../../../utils/media-permission')
 
 function getTextVisualLength(text) {
   return `${text || ''}`.split('').reduce((total, char) => {
@@ -238,8 +239,12 @@ Page({
     } catch (error) {
       console.error('save image failed', error)
       this.setData({ savingImage: false })
+      if (isPermissionDenied(error)) {
+        guideToPhotoPermission()
+        return
+      }
       wx.showToast({
-        title: '保存失败，请检查相册权限',
+        title: '保存失败，请稍后重试',
         icon: 'none'
       })
     }

@@ -43,6 +43,7 @@
 ├─ utils/
 │  ├─ analytics.js
 │  ├─ auth.js
+│  ├─ media-permission.js
 │  ├─ export-records.js
 │  ├─ logger.js
 │  ├─ cos-upload.js
@@ -252,6 +253,10 @@
 ### `utils/record-image.js`
 
 负责记录表单图片选择后的前端处理：单张图片最大 5MB，500KB 以下不压缩，500KB-2MB 尽量压缩到 500KB 左右，2MB-5MB 尽量压缩到 1MB 左右，并返回可保存或上传的本地临时路径。新建记录和编辑记录页共用该工具。
+
+### `utils/media-permission.js`
+
+负责识别图片选择或保存流程中的取消、权限拒绝错误，并在用户曾拒绝授权时引导其打开微信授权设置。新建记录、编辑记录和记录详情页共用该工具。
 
 ### `utils/cos-upload.js`
 

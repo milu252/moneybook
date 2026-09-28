@@ -10,6 +10,7 @@ const {
 const { getContactRecordById, getContacts } = require('../../../data/contacts')
 const { track } = require('../../../utils/analytics')
 const { processRecordImages } = require('../../../utils/record-image')
+const { isUserCancel, isPermissionDenied, guideToPhotoPermission } = require('../../../utils/media-permission')
 const logger = require('../../../utils/logger')
 
 const weekLabels = ['日', '一', '二', '三', '四', '五', '六']
@@ -508,7 +509,14 @@ Page({
         sizeType: ['original'],
         sourceType: ['album', 'camera'],
         success: (res) => onSuccess(res.tempFiles),
-        fail: () => this.setData({ choosingImage: false })
+        fail: (error) => {
+          this.setData({ choosingImage: false })
+          if (isPermissionDenied(error)) {
+            guideToPhotoPermission()
+          } else if (!isUserCancel(error)) {
+            wx.showToast({ title: '图片选择失败，请稍后重试', icon: 'none' })
+          }
+        }
       })
       return
     }
@@ -518,7 +526,14 @@ Page({
       sizeType: ['original'],
       sourceType: ['album', 'camera'],
       success: (res) => onSuccess(res.tempFilePaths),
-      fail: () => this.setData({ choosingImage: false })
+      fail: (error) => {
+        this.setData({ choosingImage: false })
+        if (isPermissionDenied(error)) {
+          guideToPhotoPermission()
+        } else if (!isUserCancel(error)) {
+          wx.showToast({ title: '图片选择失败，请稍后重试', icon: 'none' })
+        }
+      }
     })
   },
 
