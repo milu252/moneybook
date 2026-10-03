@@ -1,9 +1,9 @@
 <navigation-bar title="联系人" back="{{false}}" color="#111111" background="transparent"></navigation-bar>
 
-<view class="contacts-page">
+<view class="contacts-page" bindtap="closeSuggestions">
   <scroll-view class="contacts-scroll" scroll-y show-scrollbar="{{false}}">
     <view class="contacts-content">
-      <view class="search-wrap">
+      <view class="search-wrap" catchtap="noop">
         <view class="search-row">
           <image class="search-svg-icon" src="/assets/icons/contacts-search.svg" mode="aspectFit"></image>
           <view class="search-box">
@@ -11,6 +11,7 @@
               class="search-input"
               value="{{keyword}}"
               bindinput="updateKeyword"
+              bindfocus="openSuggestions"
               placeholder="搜索联系人"
               placeholder-class="search-placeholder"
             />
@@ -18,7 +19,7 @@
           </view>
         </view>
 
-        <view class="suggestion-panel" wx:if="{{suggestions.length}}">
+        <view class="suggestion-panel" wx:if="{{showSuggestions && suggestions.length}}">
           <view class="suggestion-item" wx:for="{{suggestions}}" wx:key="id" data-id="{{item.id}}" bindtap="chooseSuggestion">
             <view class="suggestion-name">{{item.name}}</view>
             <view class="suggestion-meta">
@@ -26,7 +27,7 @@
             </view>
           </view>
         </view>
-        <view class="suggestion-panel suggestion-empty-panel" wx:elif="{{keyword}}">
+        <view class="suggestion-panel suggestion-empty-panel" wx:elif="{{showSuggestions && keyword}}">
           <view class="suggestion-empty-text">无搜索结果</view>
         </view>
       </view>

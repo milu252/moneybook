@@ -27,6 +27,7 @@ Page({
     keyword: '',
     contactGroups: [],
     suggestions: [],
+    showSuggestions: false,
     total: 0
   },
 
@@ -71,7 +72,8 @@ Page({
 
     this.setData({
       keyword,
-      suggestions
+      suggestions,
+      showSuggestions: Boolean(keyword)
     })
 
     if (this.searchTrackTimer) clearTimeout(this.searchTrackTimer)
@@ -87,8 +89,21 @@ Page({
   chooseSuggestion(event) {
     const id = event.currentTarget.dataset.id
     if (!id) return
+    this.setData({ showSuggestions: false })
     this.navigateContactDetail(id)
   },
+
+  openSuggestions() {
+    if (!this.data.keyword) return
+    this.setData({ showSuggestions: true })
+  },
+
+  closeSuggestions() {
+    if (!this.data.showSuggestions) return
+    this.setData({ showSuggestions: false })
+  },
+
+  noop() {},
 
   goContactDetail(event) {
     const id = event.currentTarget.dataset.id
@@ -111,7 +126,8 @@ Page({
 
     this.setData({
       keyword: '',
-      suggestions: []
+      suggestions: [],
+      showSuggestions: false
     })
   }
 })
