@@ -272,7 +272,8 @@ Page({
     calendarDays: buildCalendar(new Date().getFullYear(), new Date().getMonth(), new Date()),
     from: '',
     nameSuggestions: [],
-    nameSuggestionHeight: 0
+    nameSuggestionHeight: 0,
+    showNameSuggestions: false
   },
 
   // 页面加载时，若 URL 参数指定了记录类型则切换到对应 tab
@@ -352,9 +353,11 @@ Page({
       const suggestions = buildNameSuggestions(value)
       nextData.nameSuggestions = suggestions
       nextData.nameSuggestionHeight = getNameSuggestionHeight(suggestions)
+      nextData.showNameSuggestions = suggestions.length > 0
     } else {
       nextData.nameSuggestions = []
       nextData.nameSuggestionHeight = 0
+      nextData.showNameSuggestions = false
     }
 
     this.setData(nextData)
@@ -368,8 +371,19 @@ Page({
     this.setData({
       'form.name': name,
       nameSuggestions: [],
-      nameSuggestionHeight: 0
+      nameSuggestionHeight: 0,
+      showNameSuggestions: false
     })
+  },
+
+  openNameSuggestions() {
+    if (!this.data.nameSuggestions.length) return
+    this.setData({ showNameSuggestions: true })
+  },
+
+  closeNameSuggestions() {
+    if (!this.data.showNameSuggestions) return
+    this.setData({ showNameSuggestions: false })
   },
 
   // 返回上一页，若无历史栈则跳转到创建首页
