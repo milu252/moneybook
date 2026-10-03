@@ -124,17 +124,6 @@ Page({
       return
     }
 
-    if (!nicknameChanged && !this.avatarChanged) {
-      logger.info('profile_edit:save_skip', {
-        reason: 'profile_unchanged'
-      })
-      wx.showToast({
-        title: '没有修改内容',
-        icon: 'none'
-      })
-      return
-    }
-
     this.setData({ saving: true })
 
     try {
@@ -176,6 +165,12 @@ Page({
 
       if (Object.keys(payload).length > 0) {
         savedProfile = await updateRemoteProfile(payload)
+      }
+      if (!savedProfile) {
+        savedProfile = {
+          ...getProfile(),
+          validation: { hasInvalid: false }
+        }
       }
       logger.info('profile_edit:save_success', {
         id: savedProfile.id,
