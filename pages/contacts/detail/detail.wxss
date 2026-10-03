@@ -8,7 +8,6 @@ page {
 }
 
 .detail-page {
-  min-height: 100vh;
   padding: 34rpx 30rpx 70rpx;
   box-sizing: border-box;
 }
