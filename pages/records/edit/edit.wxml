@@ -1,4 +1,4 @@
-<view class="create-page">
+<view class="create-page" bindtap="closeNameSuggestions">
   <view class="top-space"></view>
   <view class="back-btn" bindtap="goBack"></view>
 
@@ -8,9 +8,9 @@
         <view class="label">
           <text class="required-star">*</text><text>姓名</text>
         </view>
-        <view class="name-input-wrap">
-          <input class="input-box" value="{{form.name}}" data-field="name" bindinput="updateField" placeholder="请输入对方姓名" placeholder-class="placeholder" />
-          <scroll-view class="name-suggestion-panel" wx:if="{{nameSuggestions.length}}" scroll-y enhanced show-scrollbar="{{nameSuggestions.length > 5}}" style="height: {{nameSuggestionHeight}}rpx;">
+        <view class="name-input-wrap" catchtap="noop">
+          <input class="input-box" value="{{form.name}}" data-field="name" bindinput="updateField" bindfocus="openNameSuggestions" placeholder="请输入对方姓名" placeholder-class="placeholder" />
+          <scroll-view class="name-suggestion-panel" wx:if="{{showNameSuggestions && nameSuggestions.length}}" scroll-y enhanced show-scrollbar="{{nameSuggestions.length > 5}}" style="height: {{nameSuggestionHeight}}rpx;">
             <view
               class="name-suggestion-item"
               wx:for="{{nameSuggestions}}"
