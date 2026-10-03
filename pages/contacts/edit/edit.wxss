@@ -15,13 +15,13 @@ page {
 }
 
 .top-space {
-  height: calc(132rpx + env(safe-area-inset-top));
+  height: calc(148rpx + env(safe-area-inset-top));
 }
 
 .back-btn {
   position: absolute;
   left: 34rpx;
-  top: calc(88rpx + env(safe-area-inset-top));
+  top: calc(104rpx + env(safe-area-inset-top));
   width: 48rpx;
   height: 48rpx;
   z-index: 5;
@@ -43,7 +43,7 @@ page {
   position: absolute;
   left: 150rpx;
   right: 150rpx;
-  top: calc(88rpx + env(safe-area-inset-top));
+  top: calc(104rpx + env(safe-area-inset-top));
   height: 48rpx;
   display: flex;
   align-items: center;
