@@ -59,7 +59,7 @@
       <block wx:if="{{activeType == 'meal'}}">
         <view class="form-field">
           <view class="label"><text class="required-star">*</text><text>请客</text></view>
-          <input class="input-box" value="{{form.mealContent}}" data-field="mealContent" bindinput="updateField" placeholder="请输入请客，如吃饭、按摩..." placeholder-class="placeholder" />
+          <input class="input-box" value="{{form.mealContent}}" data-field="mealContent" bindinput="updateField" placeholder="请输入请客内容" placeholder-class="placeholder" />
         </view>
       </block>
 
