@@ -4,7 +4,7 @@
   <scroll-view class="privacy-scroll" scroll-y enhanced show-scrollbar="{{false}}">
     <view class="privacy-card">
       <view class="privacy-title">隐私政策</view>
-      <view class="privacy-date">更新日期：2026年6月18日</view>
+      <view class="privacy-date">更新日期：2026年10月6日</view>
 
       <view class="intro">
         “lumos丨随礼日记”（以下简称“我们”）重视您的隐私，并承诺以业界安全标准保护您的个人信息。您的数据仅您可见，我们不会收集、存储或转卖任何个人信息。

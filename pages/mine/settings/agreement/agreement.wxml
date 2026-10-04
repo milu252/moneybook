@@ -4,7 +4,7 @@
   <scroll-view class="agreement-scroll" scroll-y enhanced show-scrollbar="{{false}}">
     <view class="agreement-card">
       <view class="agreement-title">用户协议</view>
-      <view class="agreement-date">更新日期：2026年6月18日</view>
+      <view class="agreement-date">更新日期：2026年10月6日</view>
 
       <view class="section">
         <view class="section-title">一、协议接受与变更</view>
