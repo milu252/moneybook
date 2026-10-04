@@ -257,6 +257,8 @@ Page({
     saving: false,
     choosingImage: false,
     images: [],
+    previewVisible: false,
+    previewIndex: 0,
     calendarVisible: false,
     calendarPickerVisible: false,
     calendarPickerValue: buildCalendarPickerValue(new Date().getFullYear(), new Date().getMonth()),
@@ -610,6 +612,28 @@ Page({
     const index = event.currentTarget.dataset.index
     this.setData({
       images: this.data.images.filter((_, itemIndex) => itemIndex !== index)
+    })
+  },
+
+  openImagePreview(event) {
+    const src = event.currentTarget.dataset.src
+    const index = Number(event.currentTarget.dataset.index) || 0
+    if (!src) return
+
+    this.setData({
+      previewVisible: true,
+      previewIndex: index
+    })
+  },
+
+  handlePreviewChange(event) {
+    this.setData({ previewIndex: event.detail.current })
+  },
+
+  closeImagePreview() {
+    this.setData({
+      previewVisible: false,
+      previewIndex: 0
     })
   },
 

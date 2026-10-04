@@ -114,7 +114,7 @@
         </view>
         <view class="image-list">
           <view class="image-thumb" wx:for="{{images}}" wx:key="*this">
-            <image src="{{item}}" mode="aspectFill"></image>
+            <image src="{{item}}" mode="aspectFill" data-src="{{item}}" data-index="{{index}}" bindtap="openImagePreview"></image>
             <view class="remove" data-index="{{index}}" catchtap="removeImage">×</view>
           </view>
           <view class="add-photo" wx:if="{{images.length < 3}}" bindtap="chooseImage">
@@ -127,6 +127,16 @@
       <button class="save-btn" disabled="{{saving}}" bindtap="saveRecord">保存</button>
     </view>
   </scroll-view>
+
+  <view class="image-preview-mask" wx:if="{{previewVisible}}" bindtap="closeImagePreview">
+    <swiper class="preview-swiper" current="{{previewIndex}}" bindchange="handlePreviewChange" catchtap="noop">
+      <swiper-item wx:for="{{images}}" wx:key="*this">
+        <image class="preview-image" src="{{item}}" mode="aspectFit" bindtap="closeImagePreview"></image>
+      </swiper-item>
+    </swiper>
+
+    <view class="preview-counter" wx:if="{{images.length > 1}}">{{previewIndex + 1}}/{{images.length}}</view>
+  </view>
 
   <view class="calendar-mask" wx:if="{{calendarVisible}}" bindtap="closeCalendar">
     <view class="calendar-card" catchtap="noop">

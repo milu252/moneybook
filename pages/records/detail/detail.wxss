@@ -216,7 +216,7 @@ page {
 
 .preview-counter {
   position: fixed;
-  top: calc(env(safe-area-inset-top) + 36rpx);
+  top: calc(env(safe-area-inset-top) + 140rpx);
   left: 50%;
   z-index: 181;
   min-width: 74rpx;
