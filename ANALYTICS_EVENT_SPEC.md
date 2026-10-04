@@ -6,8 +6,9 @@
 
 - **接口**：`POST /analytics/events`
 - **Content-Type**：由现有 `utils/request.js` 以 JSON 请求发送。
-- **发送方式**：前端触发 `track()` 后异步上报，不等待埋点接口返回，也不会因埋点失败阻塞业务。
-- **失败处理**：请求、设备信息或网络类型获取失败仅打印客户端错误；业务操作不重试埋点。因此后端应允许单事件缺失，不能用事件数反推绝对业务成功数。
+- **发送方式**：前端触发 `track()` 时先同步写入本地待发送队列，再异步上报，不等待埋点接口返回，也不会因埋点失败阻塞业务。
+- **登录与重试**：没有 token 时不会发起上报；事件会保留在本地，首次登录成功及每次回到前台时自动补发。请求失败时当前及后续事件继续保留，等待下次补发。
+- **关闭场景**：`App.onHide` 的关闭事件先落盘再尝试发送。若小程序被系统回收而无法完成请求，下次启动并登录后仍会按原始 `timestamp` 补发。因此后端应按客户端事件时间分析，并允许延迟到达和少量重复事件。
 
 请求体固定结构如下：
 
@@ -37,7 +38,7 @@
 | `properties.user_id` | properties | number 或 string 或空字符串 | 本地个人资料的 `id`；资料尚未拉取或注销后可能为空 | 可空；后端应从登录 token 解析用户并校验/补全，不应信任客户端传入的用户归属。 |
 | `properties.device_id` | properties | string 或空字符串 | 首次上报生成 `device_{时间}_{随机串}` 并写入本地缓存，后续复用 | 可空；用于匿名设备去重。清缓存、重装会产生新值。 |
 | `properties.os_type` | properties | string 或空字符串 | 微信 `getDeviceInfo()` 的 `platform`（兼容旧版时取系统信息） | 可空；常见值由微信运行环境决定，如 `ios`、`android`、`devtools`，不可写死枚举。 |
-| `properties.network_type` | properties | string 或空字符串 | 微信 `getNetworkType()` 返回值 | 可空；常见 `wifi`、`2g`、`3g`、`4g`、`5g`、`unknown`、`none`，以后端实际值为准。 |
+| `properties.network_type` | properties | string | 当前统一写入 `unknown`，避免生命周期结束时等待异步网络类型查询 | 当前值为 `unknown`；后端应兼容未来扩展为 `wifi`、`4g`、`5g`、`none` 等微信网络类型。 |
 | `properties.ip` | properties | string | 当前前端固定发送空字符串 | 后端应从 HTTP 请求源解析并保存 IP；不要依赖此字段。 |
 
 **覆盖规则**：业务事件若传入与公共字段同名的属性，会覆盖 `properties` 中的默认值；当前 49 个事件均未覆盖公共字段。`page_path` 虽可由事件属性指定，但当前事件均由运行时自动获取。

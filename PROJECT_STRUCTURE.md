@@ -162,7 +162,7 @@
 
 ### `utils/analytics.js`
 
-统一埋点封装。当前后端统一上报接口尚未确认，`ANALYTICS_ENDPOINT` 为空时会在控制台输出埋点 JSON，不发起网络请求；后续只需要补充接口路径即可统一上报。
+统一埋点封装。事件先同步写入微信本地缓存的待发送队列，再通过 `POST /analytics/events` 异步发送；无 token、网络失败或小程序在 `onHide` 后被回收时，事件会保留至登录成功或下次回到前台后补发。
 
 全局公共属性：
 
@@ -172,7 +172,7 @@
 - `user_id`：当前用户 ID，自动放在 `properties` 中
 - `device_id`：匿名设备 ID，首次上报时本地生成并缓存，自动放在 `properties` 中
 - `os_type`：系统类型，例如 iOS、Android、devtools，自动放在 `properties` 中
-- `network_type`：当前网络类型，例如 wifi、4g、5g、none、unknown，自动放在 `properties` 中
+- `network_type`：当前固定为 `unknown`，避免关闭生命周期中等待异步网络类型查询，自动放在 `properties` 中
 - `ip`：用户 IP，自动放在 `properties` 中；前端默认传空字符串，建议后端从请求来源解析并补全
 
 ### `utils/logger.js`
