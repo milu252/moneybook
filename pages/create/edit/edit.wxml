@@ -8,15 +8,15 @@
     </view>
   </view>
 
-  <scroll-view class="create-scroll" scroll-y show-scrollbar="{{false}}">
+  <scroll-view class="create-scroll" scroll-y show-scrollbar="{{false}}" bindtouchmove="handleFormTouchMove">
     <view class="form-inner">
       <view class="form-field">
         <view class="label">
           <text class="required-star">*</text><text>姓名</text>
         </view>
         <view class="name-input-wrap" catchtap="noop">
-          <input class="input-box" always-embed="{{true}}" value="{{form.name}}" data-field="name" bindinput="updateField" bindfocus="openNameSuggestions" placeholder="请输入对方姓名" placeholder-class="placeholder" />
-          <scroll-view class="name-suggestion-panel" wx:if="{{showNameSuggestions && nameSuggestions.length}}" scroll-y enhanced show-scrollbar="{{nameSuggestions.length > 5}}" style="height: {{nameSuggestionHeight}}rpx;">
+          <input class="input-box" always-embed="{{true}}" focus="{{focusedField === 'name'}}" value="{{form.name}}" data-field="name" bindinput="updateField" bindfocus="openNameSuggestions" bindblur="handleInputBlur" placeholder="请输入对方姓名" placeholder-class="placeholder" />
+          <scroll-view class="name-suggestion-panel" wx:if="{{showNameSuggestions && nameSuggestions.length}}" scroll-y enhanced show-scrollbar="{{nameSuggestions.length > 5}}" catchtouchmove="noop" style="height: {{nameSuggestionHeight}}rpx;">
             <view
               class="name-suggestion-item"
               wx:for="{{nameSuggestions}}"
@@ -52,20 +52,20 @@
 
       <view class="form-field" wx:if="{{activeType == 'cash'}}">
         <view class="label"><text class="required-star">*</text><text>金额</text></view>
-        <input class="input-box" always-embed="{{true}}" type="digit" value="{{form.amount}}" data-field="amount" bindinput="updateField" placeholder="请输入金额" placeholder-class="placeholder" />
+        <input class="input-box" always-embed="{{true}}" focus="{{focusedField === 'amount'}}" type="digit" value="{{form.amount}}" data-field="amount" bindinput="updateField" bindfocus="handleInputFocus" bindblur="handleInputBlur" placeholder="请输入金额" placeholder-class="placeholder" />
       </view>
 
       <block wx:if="{{activeType == 'gift'}}">
         <view class="form-field">
           <view class="label"><text class="required-star">*</text><text>礼物</text></view>
-          <input class="input-box" always-embed="{{true}}" value="{{form.gift}}" data-field="gift" bindinput="updateField" placeholder="请输入礼物" placeholder-class="placeholder" />
+          <input class="input-box" always-embed="{{true}}" focus="{{focusedField === 'gift'}}" value="{{form.gift}}" data-field="gift" bindinput="updateField" bindfocus="handleInputFocus" bindblur="handleInputBlur" placeholder="请输入礼物" placeholder-class="placeholder" />
         </view>
       </block>
 
       <block wx:if="{{activeType == 'meal'}}">
         <view class="form-field">
           <view class="label"><text class="required-star">*</text><text>请客</text></view>
-          <input class="input-box" always-embed="{{true}}" value="{{form.mealContent}}" data-field="mealContent" bindinput="updateField" placeholder="请输入请客内容" placeholder-class="placeholder" />
+          <input class="input-box" always-embed="{{true}}" focus="{{focusedField === 'mealContent'}}" value="{{form.mealContent}}" data-field="mealContent" bindinput="updateField" bindfocus="handleInputFocus" bindblur="handleInputBlur" placeholder="请输入请客内容" placeholder-class="placeholder" />
         </view>
       </block>
 
@@ -86,17 +86,17 @@
             {{item}}
           </view>
         </view>
-        <input class="input-box scene-input" always-embed="{{true}}" value="{{form.scene}}" data-field="scene" bindinput="updateField" placeholder="请输入事由" placeholder-class="placeholder" />
+        <input class="input-box scene-input" always-embed="{{true}}" focus="{{focusedField === 'scene'}}" value="{{form.scene}}" data-field="scene" bindinput="updateField" bindfocus="handleInputFocus" bindblur="handleInputBlur" placeholder="请输入事由" placeholder-class="placeholder" />
       </view>
 
       <view class="form-field" wx:if="{{activeType == 'gift'}}">
         <view class="label">预估值</view>
-        <input class="input-box" always-embed="{{true}}" type="digit" value="{{form.estimatedValue}}" data-field="estimatedValue" bindinput="updateField" placeholder="请输入预估值" placeholder-class="placeholder" />
+        <input class="input-box" always-embed="{{true}}" focus="{{focusedField === 'estimatedValue'}}" type="digit" value="{{form.estimatedValue}}" data-field="estimatedValue" bindinput="updateField" bindfocus="handleInputFocus" bindblur="handleInputBlur" placeholder="请输入预估值" placeholder-class="placeholder" />
       </view>
 
       <view class="form-field" wx:if="{{activeType == 'meal'}}">
         <view class="label">消费金额</view>
-        <input class="input-box" always-embed="{{true}}" type="digit" value="{{form.cost}}" data-field="cost" bindinput="updateField" placeholder="请输入消费金额" placeholder-class="placeholder" />
+        <input class="input-box" always-embed="{{true}}" focus="{{focusedField === 'cost'}}" type="digit" value="{{form.cost}}" data-field="cost" bindinput="updateField" bindfocus="handleInputFocus" bindblur="handleInputBlur" placeholder="请输入消费金额" placeholder-class="placeholder" />
       </view>
 
       <view class="form-field">
@@ -104,7 +104,7 @@
           <view class="label">备注</view>
           <view class="counter">{{form.remark.length}}/200</view>
         </view>
-        <input maxlength="201" class="input-box" always-embed="{{true}}" value="{{form.remark}}" data-field="remark" bindinput="updateField" placeholder="" placeholder-class="placeholder" />
+        <input maxlength="201" class="input-box" always-embed="{{true}}" focus="{{focusedField === 'remark'}}" value="{{form.remark}}" data-field="remark" bindinput="updateField" bindfocus="handleInputFocus" bindblur="handleInputBlur" placeholder="" placeholder-class="placeholder" />
       </view>
 
       <view class="image-area">

@@ -275,7 +275,8 @@ Page({
     from: '',
     nameSuggestions: [],
     nameSuggestionHeight: 0,
-    showNameSuggestions: false
+    showNameSuggestions: false,
+    focusedField: ''
   },
 
   // 页面加载时，若 URL 参数指定了记录类型则切换到对应 tab
@@ -379,8 +380,32 @@ Page({
   },
 
   openNameSuggestions() {
-    if (!this.data.nameSuggestions.length) return
-    this.setData({ showNameSuggestions: true })
+    this.setData({
+      focusedField: 'name',
+      showNameSuggestions: this.data.nameSuggestions.length > 0
+    })
+  },
+
+  handleInputFocus(event) {
+    const field = event.currentTarget.dataset.field
+    if (!field || this.data.focusedField === field) return
+    this.setData({ focusedField: field })
+  },
+
+  handleInputBlur(event) {
+    const field = event.currentTarget.dataset.field
+    if (this.data.focusedField !== field) return
+    this.setData({ focusedField: '' })
+  },
+
+  handleFormTouchMove() {
+    if (!this.data.focusedField) return
+
+    this.setData({
+      focusedField: '',
+      showNameSuggestions: false
+    })
+    wx.hideKeyboard()
   },
 
   closeNameSuggestions() {
