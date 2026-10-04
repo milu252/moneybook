@@ -118,6 +118,7 @@
         src="{{item}}"
         mode="aspectFill"
         data-src="{{item}}"
+        data-index="{{index}}"
         bindtap="openImagePreview"
       ></image>
     </view>
@@ -140,12 +141,24 @@
   </view>
 
   <view class="image-preview-mask" wx:if="{{previewVisible}}" bindtap="closeImagePreview">
-    <image
-      class="preview-image"
-      src="{{previewImage}}"
-      mode="aspectFit"
-      catchlongpress="openSaveImageSheet"
-    ></image>
+    <swiper
+      class="preview-swiper"
+      current="{{previewIndex}}"
+      bindchange="handlePreviewChange"
+      catchtap="noop"
+    >
+      <swiper-item wx:for="{{previewImages}}" wx:key="*this">
+        <image
+          class="preview-image"
+          src="{{item}}"
+          mode="aspectFit"
+          bindtap="closeImagePreview"
+          catchlongpress="openSaveImageSheet"
+        ></image>
+      </swiper-item>
+    </swiper>
+
+    <view class="preview-counter" wx:if="{{previewImages.length > 1}}">{{previewIndex + 1}}/{{previewImages.length}}</view>
 
     <view class="save-sheet-mask" wx:if="{{showSaveSheet}}" catchtap="closeSaveImageSheet">
       <view class="save-sheet" catchtap="noop">

@@ -207,10 +207,28 @@ page {
   background: rgba(0, 0, 0, 0.92);
 }
 
+.preview-swiper,
 .preview-image {
   width: 100vw;
   height: 100vh;
   display: block;
+}
+
+.preview-counter {
+  position: fixed;
+  top: calc(env(safe-area-inset-top) + 36rpx);
+  left: 50%;
+  z-index: 181;
+  min-width: 74rpx;
+  padding: 10rpx 16rpx;
+  border-radius: 28rpx;
+  background: rgba(0, 0, 0, 0.42);
+  color: #ffffff;
+  font-size: 24rpx;
+  line-height: 32rpx;
+  text-align: center;
+  transform: translateX(-50%);
+  box-sizing: border-box;
 }
 
 .save-sheet-mask {

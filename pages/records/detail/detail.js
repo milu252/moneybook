@@ -23,6 +23,8 @@ Page({
     showDeleteDialog: false,
     previewVisible: false,
     previewImage: '',
+    previewImages: [],
+    previewIndex: 0,
     showSaveSheet: false,
     savingImage: false,
     deletingRecord: false
@@ -152,13 +154,30 @@ Page({
 
   openImagePreview(event) {
     const src = event.currentTarget.dataset.src
+    const index = Number(event.currentTarget.dataset.index) || 0
     if (!src) return
+
+    const previewImages = this.data.record && Array.isArray(this.data.record.images)
+      ? this.data.record.images
+      : [src]
 
     this.setData({
       previewVisible: true,
       previewImage: src,
+      previewImages,
+      previewIndex: index,
       showSaveSheet: false,
       savingImage: false
+    })
+  },
+
+  handlePreviewChange(event) {
+    const previewIndex = event.detail.current
+    const previewImage = this.data.previewImages[previewIndex] || ''
+
+    this.setData({
+      previewIndex,
+      previewImage
     })
   },
 
@@ -168,6 +187,8 @@ Page({
     this.setData({
       previewVisible: false,
       previewImage: '',
+      previewImages: [],
+      previewIndex: 0,
       showSaveSheet: false,
       savingImage: false
     })
