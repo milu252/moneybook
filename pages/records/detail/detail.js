@@ -2,6 +2,7 @@ const { records, findRecordById, moveRecordToTrash, fetchRecords, refreshRecordD
 const { getContactRecordById } = require('../../../data/contacts')
 const { track } = require('../../../utils/analytics')
 const { isPermissionDenied, guideToPhotoPermission } = require('../../../utils/media-permission')
+const { cacheRecordImage, getCachedRecordImagePath } = require('../../../utils/record-image-cache')
 
 function getTextVisualLength(text) {
   return `${text || ''}`.split('').reduce((total, char) => {
@@ -61,7 +62,9 @@ Page({
       setTimeout(() => wx.navigateBack(), 800)
       return null
     }
-    const images = Array.isArray(record.images) ? record.images : []
+    const remoteImages = Array.isArray(record.images) ? record.images : []
+    // 已缓存的图片先直接使用持久本地路径，避免再次进入详情页时重复请求远程地址。
+    const images = remoteImages.map((url) => getCachedRecordImagePath(url) || url)
     const value = `${record.value || ''}`.trim()
     const scene = `${record.scene || ''}`.trim()
     const remark = `${record.remark || ''}`.trim()
@@ -80,6 +83,7 @@ Page({
         estimatedValue,
         cost,
         images,
+        remoteImages,
         valueWrapClass: longValue ? 'long' : 'short',
         sceneClass: longScene ? 'long' : 'short',
         hasRemark: Boolean(remark),
@@ -91,7 +95,20 @@ Page({
       }
     })
 
+    this.cacheRecordImages(record.id, remoteImages)
+
     return record
+  },
+
+  async cacheRecordImages(recordId, remoteImages) {
+    if (!Array.isArray(remoteImages) || !remoteImages.length) return
+
+    const cachedImages = await Promise.all(remoteImages.map((url) => cacheRecordImage(url)))
+    if (!this.data.record || this.data.record.id !== recordId) return
+
+    this.setData({
+      'record.images': cachedImages
+    })
   },
 
   editRecord() {

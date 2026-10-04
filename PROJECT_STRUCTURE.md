@@ -49,6 +49,7 @@
 │  ├─ cos-upload.js
 │  ├─ pinyin.js
 │  ├─ record-image.js
+│  ├─ record-image-cache.js
 │  └─ request.js
 ├─ pages/
 │  ├─ index/
@@ -253,6 +254,10 @@
 ### `utils/record-image.js`
 
 负责记录表单图片选择后的前端处理：单张图片最大 5MB，500KB 以下不压缩，500KB-2MB 尽量压缩到 500KB 左右，2MB-5MB 尽量压缩到 1MB 左右，并返回可保存或上传的本地临时路径。新建记录和编辑记录页共用该工具。
+
+### `utils/record-image-cache.js`
+
+负责记录详情图片的本地持久缓存。首次访问远程 HTTPS 图片时会下载，并通过 `wx.getFileSystemManager()` 复制到 `wx.env.USER_DATA_PATH` 的本地用户文件区；`Storage` 中仅保存远程 URL 到本地路径的映射。再次打开详情页优先展示该本地路径，下载或缓存失败时自动保留远程 URL 作为回退。缓存最多保留 100 张图片，超出后清理最久未使用的文件。
 
 ### `utils/media-permission.js`
 
