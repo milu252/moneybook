@@ -1,8 +1,64 @@
 const { del, post } = require('../../../utils/request')
 const { ensureToken, clearToken } = require('../../../utils/auth')
-const { clearAllLocalData } = require('../../../utils/local-data')
+const { records } = require('../../../data/records')
 const { track } = require('../../../utils/analytics')
 const logger = require('../../../utils/logger')
+
+function removeFileSystemEntry(fileSystem, filePath) {
+  return new Promise((resolve) => {
+    fileSystem.stat({
+      path: filePath,
+      success(result) {
+        const stats = result && result.stats
+        if (stats && typeof stats.isDirectory === 'function' && stats.isDirectory()) {
+          fileSystem.rmdir({
+            dirPath: filePath,
+            recursive: true,
+            complete: resolve
+          })
+          return
+        }
+
+        fileSystem.unlink({
+          filePath,
+          complete: resolve
+        })
+      },
+      fail: resolve
+    })
+  })
+}
+
+function clearUserDataFiles() {
+  if (!wx.env || !wx.env.USER_DATA_PATH || typeof wx.getFileSystemManager !== 'function') {
+    return Promise.resolve()
+  }
+
+  const fileSystem = wx.getFileSystemManager()
+  const userDataPath = wx.env.USER_DATA_PATH
+  return new Promise((resolve) => {
+    fileSystem.readdir({
+      dirPath: userDataPath,
+      success(result) {
+        const files = result && Array.isArray(result.files) ? result.files : []
+        Promise.all(files.map((name) => removeFileSystemEntry(fileSystem, `${userDataPath}/${name}`)))
+          .then(resolve)
+          .catch(resolve)
+      },
+      fail: resolve
+    })
+  })
+}
+
+async function clearAllLocalData() {
+  records.splice(0, records.length)
+
+  try {
+    wx.clearStorageSync()
+  } catch (error) {}
+
+  await clearUserDataFiles()
+}
 
 Page({
   data: {
