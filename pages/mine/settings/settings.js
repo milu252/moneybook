@@ -1,6 +1,6 @@
 const { del, post } = require('../../../utils/request')
 const { ensureToken, clearToken } = require('../../../utils/auth')
-const { records } = require('../../../data/records')
+const { clearAllLocalData } = require('../../../utils/local-data')
 const { track } = require('../../../utils/analytics')
 const logger = require('../../../utils/logger')
 
@@ -81,11 +81,17 @@ Page({
     this.setData({ showClearCacheDialog: false })
   },
 
-  confirmClearCache() {
-    wx.clearStorageSync()
+  async confirmClearCache() {
+    wx.showLoading({
+      title: '清除中...',
+      mask: true
+    })
+
+    await clearAllLocalData()
+    wx.hideLoading()
     this.setData({ showClearCacheDialog: false })
     wx.showToast({
-      title: '缓存已清除',
+      title: '本地数据已清除',
       icon: 'none'
     })
   },
@@ -173,7 +179,7 @@ Page({
     try {
       await this.deleteRemoteAccount()
       track('account_delete_success')
-      this.clearAccountLocalData()
+      await this.clearAccountLocalData()
 
       setTimeout(() => {
         this.setData({
@@ -212,13 +218,9 @@ Page({
     }
   },
 
-  clearAccountLocalData() {
-    try {
-      wx.clearStorageSync()
-    } catch (error) {}
-
+  async clearAccountLocalData() {
+    await clearAllLocalData()
     clearToken()
-    records.splice(0, records.length)
   },
 
   finishCancelAccount() {

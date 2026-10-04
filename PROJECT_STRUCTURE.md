@@ -50,6 +50,7 @@
 │  ├─ pinyin.js
 │  ├─ record-image.js
 │  ├─ record-image-cache.js
+│  ├─ local-data.js
 │  └─ request.js
 ├─ pages/
 │  ├─ index/
@@ -258,6 +259,10 @@
 ### `utils/record-image-cache.js`
 
 负责记录详情图片的本地持久缓存。首次访问远程 HTTPS 图片时会下载，并通过 `wx.getFileSystemManager()` 复制到 `wx.env.USER_DATA_PATH` 的本地用户文件区；`Storage` 中仅保存远程 URL 到本地路径的映射。再次打开详情页优先展示该本地路径，下载或缓存失败时自动保留远程 URL 作为回退。缓存最多保留 100 张图片，超出后清理最久未使用的文件。
+
+### `utils/local-data.js`
+
+统一清除本机数据。`clearAllLocalData()` 会清空共享的内存记录、微信 Storage，并删除 `wx.env.USER_DATA_PATH` 下由本小程序保存的全部文件和目录，包括记录图片缓存、导出文件和诊断日志；不影响服务端账户及云端记录。
 
 ### `utils/media-permission.js`
 
@@ -599,7 +604,7 @@
 - `sections` 渲染清除缓存、用户协议、隐私政策、注销账号
 - 点击“用户协议”跳转到 `pages/mine/settings/agreement/agreement`
 - 点击“隐私政策”跳转到 `pages/mine/settings/privacy/privacy`
-- 点击“清除缓存”展示确认弹窗，确认后清空本地缓存
+- 点击“清除缓存”展示确认弹窗，确认后清空内存记录、微信本地缓存和本地用户文件区中的图片、导出文件及日志；不删除云端记录
 - 点击“注销账号”展示两次确认弹窗，最终调用 `DELETE /account`，后端成功后清空本地缓存、token 和内存记录，再展示注销成功弹窗
 
 ### `pages/mine/settings/agreement`
