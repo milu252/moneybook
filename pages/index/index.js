@@ -1,6 +1,17 @@
 const { records, fetchRecords, loadCachedRecords, refreshRecordDisplayNames } = require('../../data/records')
 const { track } = require('../../utils/analytics')
 
+const SHARE_TITLE = '随礼日记-记录人情往来'
+const SHARE_PATH = '/pages/index/index'
+const SHARE_IMAGES = [
+  '/assets/share/money_book.jpg',
+  '/assets/share/my_daily_note.jpg'
+]
+
+function getShareImage() {
+  return SHARE_IMAGES[Math.floor(Math.random() * SHARE_IMAGES.length)]
+}
+
 function amountOf(record) {
   const value = Number.parseFloat(record.value)
   return Number.isNaN(value) ? 0 : value
@@ -66,6 +77,12 @@ Page({
   },
 
   onLoad() {
+    if (typeof wx.showShareMenu === 'function') {
+      wx.showShareMenu({
+        menus: ['shareAppMessage', 'shareTimeline']
+      })
+    }
+
     // 读本地缓存，冷启动也能秒显数据
     loadCachedRecords()
     refreshRecordDisplayNames()
@@ -105,5 +122,20 @@ Page({
     wx.navigateTo({
       url: `/pages/records/detail/detail?id=${id}&from=home`
     })
+  },
+
+  onShareAppMessage() {
+    return {
+      title: SHARE_TITLE,
+      path: SHARE_PATH,
+      imageUrl: getShareImage()
+    }
+  },
+
+  onShareTimeline() {
+    return {
+      title: SHARE_TITLE,
+      imageUrl: getShareImage()
+    }
   }
 })
