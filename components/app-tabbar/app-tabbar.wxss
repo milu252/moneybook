@@ -3,10 +3,10 @@
   left: 0;
   right: 0;
   bottom: 0;
-  height: 94px;
+  height: calc(64px + env(safe-area-inset-bottom));
   display: flex;
   align-items: start;
-  padding: 9px 18rpx 44px;
+  padding: 9px 18rpx calc(11px + env(safe-area-inset-bottom));
   border-top: 1rpx solid rgba(221, 205, 181, 0.86);
   background: rgba(255, 255, 255, 0.92);
   box-shadow: 0 -8rpx 24rpx rgba(122, 88, 44, 0.08);
