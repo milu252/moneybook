@@ -46,6 +46,19 @@
 
       <view class="form-field" wx:if="{{activeType == 'cash'}}">
         <view class="label"><text class="required-star">*</text><text>金额</text></view>
+        <view class="scene-tags">
+          <view
+            wx:for="{{amountOptions}}"
+            wx:key="*this"
+            class="scene-tag {{form.amount == item ? 'active' : ''}}"
+            data-amount="{{item}}"
+            bindtap="chooseAmountTag"
+            hover-class="tap-active"
+            hover-stay-time="80"
+          >
+            {{item}}
+          </view>
+        </view>
         <input class="input-box" type="digit" value="{{form.amount}}" data-field="amount" bindinput="updateField" placeholder="请输入金额" placeholder-class="placeholder" />
       </view>
 

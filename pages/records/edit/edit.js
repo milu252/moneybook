@@ -17,6 +17,7 @@ const weekLabels = ['日', '一', '二', '三', '四', '五', '六']
 const yearOptions = Array.from({ length: 21 }, (_, index) => new Date().getFullYear() - 10 + index)
 const monthOptions = Array.from({ length: 12 }, (_, index) => index + 1)
 const sceneOptions = ['结婚', '乔迁', '生日', '生娃', '节日']
+const amountOptions = ['200', '300', '500', '800', '1000']
 const numericFields = ['amount', 'estimatedValue', 'cost']
 const remarkMaxLength = 200
 
@@ -195,6 +196,7 @@ Page({
   data: {
     record: null,
     sceneOptions,
+    amountOptions,
     activeType: 'cash',
     giftType: 'receive',
     selectedSceneTag: '',
@@ -288,6 +290,15 @@ Page({
 
   chooseGiftType(event) {
     this.setData({ giftType: event.currentTarget.dataset.type })
+  },
+
+  chooseAmountTag(event) {
+    const amount = event.currentTarget.dataset.amount
+    if (!amount) return
+
+    this.setData({
+      'form.amount': amount
+    })
   },
 
   chooseSceneTag(event) {

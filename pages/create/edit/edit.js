@@ -16,6 +16,7 @@ const remarkMaxLength = 200
 
 // 事由快捷标签选项
 const sceneOptions = ['结婚', '乔迁', '生日', '生娃', '节日']
+const amountOptions = ['200', '300', '500', '800', '1000']
 const CREATE_START_TIME_STORAGE_KEY = 'record_create_start_time'
 
 // 表单各字段的初始值
@@ -247,6 +248,7 @@ Page({
       { key: 'meal', name: '请客' }
     ],
     sceneOptions,
+    amountOptions,
     activeType: 'cash',
     giftType: 'receive',
     selectedSceneTag: '',
@@ -319,6 +321,16 @@ Page({
   // 切换收/送方向
   chooseGiftType(event) {
     this.setData({ giftType: event.currentTarget.dataset.type })
+  },
+
+  // 点击金额快捷标签，将对应数值写入礼金金额输入框
+  chooseAmountTag(event) {
+    const amount = event.currentTarget.dataset.amount
+    if (!amount) return
+
+    this.setData({
+      'form.amount': amount
+    })
   },
 
   // 点击场景快捷标签，同步更新表单 scene 字段
