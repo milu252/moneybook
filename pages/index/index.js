@@ -73,7 +73,8 @@ function sortRecordsByTime(sourceRecords) {
 Page({
   data: {
     records: [],
-    summary: buildHomeSummary()
+    summary: buildHomeSummary(),
+    homeReady: false
   },
 
   onLoad() {
@@ -105,7 +106,8 @@ Page({
     refreshRecordDisplayNames()
     this.setData({
       records: sortRecordsByTime(records).slice(0, 6),
-      summary: buildHomeSummary()
+      summary: buildHomeSummary(),
+      homeReady: true
     })
   },
 

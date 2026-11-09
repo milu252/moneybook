@@ -53,6 +53,7 @@
 
         <view class="recent-list {{!records.length ? 'empty' : ''}}">
           <record-group-list
+            wx:if="{{homeReady}}"
             plain="{{true}}"
             embedded="{{true}}"
             records="{{records}}"

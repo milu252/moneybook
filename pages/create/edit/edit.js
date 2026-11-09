@@ -811,6 +811,13 @@ Page({
         return
       }
 
+      if (this.data.from === 'create') {
+        wx.reLaunch({
+          url: '/pages/index/index'
+        })
+        return
+      }
+
       backToCreateEntry()
     }, 800)
   }
